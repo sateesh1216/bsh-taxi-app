@@ -40,7 +40,7 @@ export default function Home() {
   return (
     <Screen>
       <View style={s.top}>
-        <Image source={require("../../../assets/images/logo-light.png")} style={s.logo} resizeMode="contain" accessibilityLabel="BSH Taxi Services" />
+        <Image source={require("../../../assets/images/logo-light.webp")} style={s.logo} resizeMode="contain" accessibilityLabel="BSH Taxi Services" />
         {user ? (
           <Pressable accessibilityRole="button" accessibilityLabel="Profile" onPress={() => router.push("/profile")} style={s.avatar}><Text style={s.initial}>{(user.name || user.email).charAt(0).toUpperCase()}</Text></Pressable>
         ) : (
@@ -115,8 +115,8 @@ export default function Home() {
 }
 
 const s = StyleSheet.create({
-  top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  logo: { height: 36, width: 98 },
+  top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 },
+  logo: { height: 52, width: 195, flexShrink: 1 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.amber, alignItems: "center", justifyContent: "center" },
   initial: { fontFamily: fonts.heading, fontSize: 18, color: colors.navy },
   signin: { minHeight: 44, paddingHorizontal: 18, borderRadius: 22, justifyContent: "center", backgroundColor: colors.amber },
