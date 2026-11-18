@@ -1,12 +1,11 @@
 import { useEffect, useRef, type ComponentRef, type ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ViewStyle } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, space } from "../theme/colors";
 
 type Props = { children: ReactNode; scroll?: boolean; bottomPad?: number; style?: ViewStyle; scrollKey?: number };
 
-/** Dark navy page with blue and amber glows behind the glass cards. */
+/** White page with restrained blue ambient highlights. */
 export function Screen({ children, scroll = true, bottomPad = 110, style, scrollKey }: Props) {
   const insets = useSafeAreaInsets();
   const ref = useRef<ComponentRef<typeof ScrollView>>(null);
@@ -14,8 +13,8 @@ export function Screen({ children, scroll = true, bottomPad = 110, style, scroll
   const pad = { paddingTop: insets.top + space.lg, paddingBottom: bottomPad, paddingHorizontal: space.xl };
   return (
     <View style={styles.root}>
-      <LinearGradient colors={["rgba(21,94,239,0.6)", "rgba(21,94,239,0)"]} start={{ x: 1, y: 0 }} end={{ x: 0.2, y: 0.5 }} style={StyleSheet.absoluteFill} />
-      <LinearGradient colors={["rgba(245,162,0,0.28)", "rgba(245,162,0,0)"]} start={{ x: 1, y: 1 }} end={{ x: 0.4, y: 0.55 }} style={StyleSheet.absoluteFill} />
+      <View pointerEvents="none" style={styles.glowTop} />
+      <View pointerEvents="none" style={styles.glowBottom} />
       {scroll ? (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}><ScrollView ref={ref} contentContainerStyle={[pad, style]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>{children}</ScrollView></KeyboardAvoidingView>
       ) : (
@@ -25,4 +24,4 @@ export function Screen({ children, scroll = true, bottomPad = 110, style, scroll
   );
 }
 
-const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: colors.navy } });
+const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: "#FFFFFF" }, glowTop: { position: "absolute", width: 300, height: 300, borderRadius: 150, backgroundColor: "rgba(21,94,239,0.07)", right: -170, top: -170 }, glowBottom: { position: "absolute", width: 280, height: 280, borderRadius: 140, backgroundColor: "rgba(21,94,239,0.045)", left: -180, top: "48%" } });

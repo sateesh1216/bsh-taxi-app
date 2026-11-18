@@ -68,9 +68,13 @@ export function ImageCard({ title, subtitle, image, onPress, height = 160 }: Car
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={onPress} style={[s.card, { height }]}>
       {src ? <ImageBackground source={src} style={StyleSheet.absoluteFill} resizeMode="cover" /> : <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.glassStrong }]} />}
-      <LinearGradient colors={["rgba(6,15,36,0)", "rgba(6,15,36,0.88)"]} style={StyleSheet.absoluteFill} />
+      <LinearGradient
+        colors={["rgba(6,15,36,0.02)", "rgba(6,15,36,0.22)", "rgba(6,15,36,0.94)"]}
+        locations={[0, 0.48, 1]}
+        style={StyleSheet.absoluteFill}
+      />
       <View style={s.cardText}>
-        <Text style={s.cardTitle}>{title}</Text>
+        <Text style={s.cardTitle} accessibilityRole="header">{title}</Text>
         {subtitle ? <Text style={s.cardSub}>{subtitle}</Text> : null}
       </View>
     </Pressable>
@@ -92,7 +96,24 @@ const s = StyleSheet.create({
   tag: { fontFamily: fonts.bold, fontSize: 11, color: colors.navy, backgroundColor: colors.amber, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, overflow: "hidden" },
   card: { borderRadius: 20, overflow: "hidden", borderWidth: 1, borderColor: colors.glassBorder, justifyContent: "flex-end" },
   cardText: { padding: 14 },
-  cardTitle: { fontFamily: fonts.heading, fontSize: 19, color: colors.white },
-  cardSub: { marginTop: 2, fontFamily: fonts.body, fontSize: 12, color: "rgba(255,255,255,0.85)" },
+  cardTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 19,
+    lineHeight: 24,
+    color: "#FFFFFF",
+    textShadowColor: "rgba(0,0,0,0.55)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  cardSub: {
+    marginTop: 3,
+    fontFamily: fonts.body,
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#FFFFFF",
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
   pill: { alignSelf: "flex-start", fontFamily: fonts.bold, fontSize: 12, color: colors.amber, borderWidth: 1, borderColor: colors.amber, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, overflow: "hidden" },
 });

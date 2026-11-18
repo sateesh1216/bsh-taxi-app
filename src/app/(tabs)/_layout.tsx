@@ -19,12 +19,13 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 12 },
         tabBarStyle: { position: "absolute", borderTopColor: colors.glassBorder, backgroundColor: "transparent", height: 70, paddingTop: 6 },
-        tabBarBackground: () => <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />,
+        tabBarBackground: () => <BlurView intensity={50} tint="light" style={StyleSheet.absoluteFill} />,
       }}
     >
       <Tabs.Screen name="index" options={{ title: t("tab_home"), tabBarIcon: icon("home") }} />
       <Tabs.Screen name="bookings" options={{ title: t("tab_bookings"), tabBarIcon: icon("receipt") }} />
       <Tabs.Screen name="explore" options={{ title: t("tab_explore"), tabBarIcon: icon("compass") }} />
+      <Tabs.Screen name="offers" options={{ title: "Offers", tabBarIcon: icon("pricetag") }} />
       <Tabs.Screen name="profile" options={{ title: t("tab_profile"), tabBarIcon: icon("person") }} />
     </Tabs>
   );

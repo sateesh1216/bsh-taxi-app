@@ -1,15 +1,19 @@
 export const colors = {
-  navy: "#060F24",
+  // Clean white / cool-grey interface with restrained BSH blue accents.
+  navy: "#FFFFFF",
   blue: "#155EEF",
-  amber: "#F5A200",
-  amberLight: "#FFC247",
-  white: "#FFFFFF",
-  textMuted: "rgba(255,255,255,0.74)",
-  glass: "rgba(255,255,255,0.09)",
-  glassStrong: "rgba(255,255,255,0.14)",
-  glassBorder: "rgba(255,255,255,0.18)",
-  divider: "rgba(255,255,255,0.14)",
-  danger: "#FFB4A8",
+  amber: "#155EEF",
+  amberLight: "#155EEF",
+  white: "#1D2939",
+  textMuted: "#667085",
+  glass: "#FFFFFF",
+  glassStrong: "#F8FAFC",
+  glassBorder: "#E4E7EC",
+  divider: "#EAECF0",
+  danger: "#D92D20",
+  page: "#FFFFFF",
+  surface: "#F8FAFC",
+  accentSoft: "#EFF5FF",
 } as const;
 
 export const radius = { sm: 12, md: 16, lg: 22, xl: 28, pill: 999 } as const;

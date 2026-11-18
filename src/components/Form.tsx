@@ -21,7 +21,7 @@ export function Field({ label, value, onChangeText, placeholder, keyboardType, a
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="rgba(255,255,255,0.5)"
+          placeholderTextColor="#98A2B3"
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           secureTextEntry={secure}
@@ -62,7 +62,7 @@ export function DateTimeField({ label, mode, value, onChange, minimumDate }: DTP
       <Label>{label}</Label>
       {Platform.OS === "ios" ? (
         <GlassCard r={14} style={{ minHeight: 52, justifyContent: "center", alignItems: "flex-start", paddingHorizontal: 8 }}>
-          <DateTimePicker value={value} mode={mode} display="compact" themeVariant="dark" minimumDate={minimumDate} onChange={(_, d) => d && onChange(d)} />
+          <DateTimePicker value={value} mode={mode} display="compact" themeVariant="light" minimumDate={minimumDate} onChange={(_, d) => d && onChange(d)} />
         </GlassCard>
       ) : (
         <>

@@ -37,7 +37,7 @@ export default function Fleet() {
                 </View>
                 <Text style={s.sub}>{v.category} · {v.seats} seats · {v.bags} bags{v.hasAC ? " · AC" : ""}</Text>
                 <Text style={s.desc}>{v.description}</Text>
-                <Button label={`Book ${v.name}`} onPress={() => router.push("/book?type=local")} style={{ marginTop: 8 }} />
+                <Button label="Book Now" variant="fleet" onPress={() => router.push("/book?type=local")} style={{ marginTop: 8 }} />
               </View>
             </GlassCard>
           );

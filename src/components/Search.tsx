@@ -19,7 +19,7 @@ export function SearchBox() {
     <View style={{ gap: 8 }}>
       <GlassCard r={16} style={s.inputRow}>
         <Ionicons name="search" size={20} color={colors.textMuted} />
-        <TextInput accessibilityLabel="Search places, routes and services" value={q} onChangeText={setQ} placeholder={t("search_ph")} placeholderTextColor="rgba(255,255,255,0.5)" style={s.input} autoCapitalize="none" returnKeyType="search" />
+        <TextInput accessibilityLabel="Search places, routes and services" value={q} onChangeText={setQ} placeholder={t("search_ph")} placeholderTextColor="#98A2B3" style={s.input} autoCapitalize="none" returnKeyType="search" />
         {q ? <Pressable accessibilityLabel="Clear search" onPress={() => setQ("")} hitSlop={10}><Ionicons name="close-circle" size={20} color={colors.textMuted} /></Pressable> : null}
       </GlassCard>
       {q.trim() ? (
@@ -94,7 +94,7 @@ export function LocationField({ label, value, onChangeText, placeholder, popular
     <View style={{ gap: 6 }}>
       <Label>{label}</Label>
       <GlassCard r={14}>
-        <TextInput accessibilityLabel={label} value={value} onChangeText={(t) => { onChangeText(t); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 200)} placeholder={placeholder} placeholderTextColor="rgba(255,255,255,0.5)" style={s.field} autoCapitalize="words" />
+        <TextInput accessibilityLabel={label} value={value} onChangeText={(t) => { onChangeText(t); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 200)} placeholder={placeholder} placeholderTextColor="#98A2B3" style={s.field} autoCapitalize="words" />
       </GlassCard>
       {open && (
         <GlassCard r={14} strong>

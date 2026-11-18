@@ -17,7 +17,13 @@ export async function getSavedPlaces(): Promise<SavedPlaces> {
 
 export async function setSavedPlaces(p: SavedPlaces, who?: { name: string; email: string }) {
   await AsyncStorage.setItem(scopedKey(BASE), JSON.stringify(p));
-  if (cloudReady() && who) void pushProfile({ ...who, ...p });
+  if (cloudReady() && who) {
+    void pullProfile().then((existing) => pushProfile({
+      ...who, ...p,
+      phone: existing?.phone ?? "",
+      photo: existing?.photo ?? "",
+    }));
+  }
 }
 
 /** Saved places stored in the account win over this phone's copy. */

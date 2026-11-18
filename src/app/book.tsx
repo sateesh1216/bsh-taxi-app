@@ -14,7 +14,7 @@ import { CAR_TYPES, LOCAL_FARES, LOCAL_PACKAGES, TERMS_AND_CONDITIONS, TOUR_FARE
 import { popularDrop, popularPickup, type PlaceSuggestion } from "../data/site";
 import { ApiError, startPayNow, submitEnquiry } from "../lib/api";
 import { KINDS, buildPayload, buildPayNow, fareFor, formatCurrency, newDraft, rows, tourPkg, validateContact, validateTrip, whatsappMessage, type Draft, type ServiceKind } from "../lib/booking";
-import { saveEnquiry } from "../lib/storage";
+import { getEnquiry, saveEnquiry } from "../lib/storage";
 import { useAuth } from "../lib/auth";
 import { useT, type Key } from "../lib/i18n";
 import { getSavedPlaces, type SavedPlaces } from "../lib/prefs";
@@ -27,7 +27,7 @@ const TITLES: Record<ServiceKind, string> = { local: "Local Taxi", outstation: "
 export default function Book() {
   const { t } = useT();
   const { user } = useAuth();
-  const params = useLocalSearchParams<{ type?: string; drop?: string; pickup?: string }>();
+  const params = useLocalSearchParams<{ type?: string; drop?: string; pickup?: string; rebook?: string }>();
   const initial = KINDS.find((k) => k === params.type) ?? "local";
   const [d, setD] = useState<Draft>(() => { const x = newDraft(initial, params.drop ?? ""); return params.pickup ? { ...x, pickup: params.pickup } : x; });
   const [step, setStep] = useState(1);
@@ -37,6 +37,27 @@ export default function Book() {
 
   useEffect(() => { getSavedPlaces().then(setSaved); }, [user]);
   useEffect(() => { if (user) setD((p) => ({ ...p, name: p.name || user.name, email: p.email || user.email })); }, [user]);
+  useEffect(() => {
+    if (!params.rebook) return;
+    let active = true;
+    getEnquiry(String(params.rebook)).then((saved) => {
+      if (!active || !saved) return;
+      const values = Object.fromEntries(saved.rows.map((r) => [r.label.toLowerCase(), r.value]));
+      const title = saved.title.toLowerCase();
+      const kind: ServiceKind = title.includes("airport") ? "airport" : title.includes("outstation") ? "outstation" : title.includes("tour") ? "tour" : "local";
+      const carName = String(values.car || "").toLowerCase();
+      const carId = CAR_TYPES.find((c) => c.name.toLowerCase() === carName || carName.includes(c.name.toLowerCase()))?.id ?? CAR_TYPES[0].id;
+      const localLabel = String(values.package || "");
+      const localPkg = LOCAL_PACKAGES.find((p) => p.label.toLowerCase() === localLabel.toLowerCase())?.id ?? LOCAL_PACKAGES[0].id;
+      const tourId = TOUR_PACKAGES.find((p) => p.name.toLowerCase() === localLabel.toLowerCase())?.id ?? TOUR_PACKAGES[0].id;
+      const from = String(values.from || values.pickup || "");
+      const to = String(values.to || "");
+      const airportOrigin = from.toLowerCase().includes("airport");
+      const pickup = kind === "airport" ? (airportOrigin ? to : from) : from;
+      setD((prev) => ({ ...prev, kind, pickup: kind === "outstation" ? pickup || "Visakhapatnam" : pickup, drop: kind === "outstation" ? to : "", carId, localPkg, tourId, round: String(values.trip || "").toLowerCase().includes("round"), fromAirport: airportOrigin, date: new Date(), name: prev.name, email: prev.email }));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [params.rebook]);
 
   const account = user ? { email: user.email } : undefined;
   const pickupList = useMemo<PlaceSuggestion[]>(() => [

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { LinearGradient } from "expo-linear-gradient";
 import { Screen } from "../components/Screen";
 import { GlassCard } from "../components/GlassCard";
 import { Button } from "../components/Button";
@@ -27,9 +26,9 @@ export default function Confirmed() {
   return (
     <Screen bottomPad={40}>
       <View style={s.center}>
-        <LinearGradient colors={[colors.amberLight, colors.amber]} style={s.tick}>
-          <Ionicons name="checkmark" size={44} color={colors.navy} />
-        </LinearGradient>
+        <View style={s.tick}>
+          <Ionicons name="checkmark" size={44} color="#FFFFFF" />
+        </View>
         <Text style={s.h1}>{t("enq_sent")}</Text>
         {shown && <Text style={s.sub}>{t("enq_no")} <Text style={{ color: colors.white, fontFamily: fonts.bold }}>{shown}</Text></Text>}
         <Text style={[s.sub, { marginTop: 8 }]}>{t("enq_contact")}</Text>
@@ -53,7 +52,7 @@ export default function Confirmed() {
 
 const s = StyleSheet.create({
   center: { alignItems: "center", marginTop: 40 },
-  tick: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center" },
+  tick: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center", backgroundColor: "#155EEF" },
   h1: { marginTop: 18, fontFamily: fonts.heading, fontSize: 30, color: colors.white },
   sub: { marginTop: 4, fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.textMuted, textAlign: "center" },
 });

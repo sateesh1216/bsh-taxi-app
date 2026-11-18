@@ -54,12 +54,15 @@ export async function pullBookings(): Promise<SavedEnquiry[] | null> {
   }
 }
 
-export type CloudProfile = { name: string; email: string; home: string; office: string };
+export type CloudProfile = { name: string; email: string; home: string; office: string; phone?: string; photo?: string };
 
 export async function pushProfile(p: CloudProfile): Promise<boolean> {
   if (!cloudReady()) return false;
   try {
-    const res = await call("PATCH", `users/${session!.uid}`, { fields: { name: str(p.name), email: str(p.email), home: str(p.home), office: str(p.office) } });
+    const res = await call("PATCH", `users/${session!.uid}`, { fields: {
+      name: str(p.name), email: str(p.email), home: str(p.home), office: str(p.office),
+      phone: str(p.phone ?? ""), photo: str(p.photo ?? ""),
+    } });
     return res.ok;
   } catch {
     return false;
@@ -72,7 +75,11 @@ export async function pullProfile(): Promise<CloudProfile | null> {
     const res = await call("GET", `users/${session!.uid}`);
     if (!res.ok) return null;
     const d = (await res.json()) as Doc;
-    return { name: readStr(d.fields, "name"), email: readStr(d.fields, "email"), home: readStr(d.fields, "home"), office: readStr(d.fields, "office") };
+    return {
+      name: readStr(d.fields, "name"), email: readStr(d.fields, "email"),
+      home: readStr(d.fields, "home"), office: readStr(d.fields, "office"),
+      phone: readStr(d.fields, "phone"), photo: readStr(d.fields, "photo"),
+    };
   } catch {
     return null;
   }

@@ -22,7 +22,7 @@ export default function OutstationList() {
       <Header eyebrow="OUTSTATION TAXI" title="Taxi from Vizag to any city" />
       <GlassCard r={16} style={s.inputRow}>
         <Ionicons name="search" size={20} color={colors.textMuted} />
-        <TextInput accessibilityLabel="Search outstation routes" value={q} onChangeText={setQ} placeholder="Search city or town" placeholderTextColor="rgba(255,255,255,0.5)" style={s.input} />
+        <TextInput accessibilityLabel="Search outstation routes" value={q} onChangeText={setQ} placeholder="Search city or town" placeholderTextColor="#98A2B3" style={s.input} />
       </GlassCard>
       <View style={s.chips}>
         {CATS.map((c) => (

@@ -82,6 +82,8 @@ type Ctx = {
   resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
+  updateDisplayProfile: (name: string, photoUrl: string) => Promise<void>;
+  requestEmailChange: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<Ctx | null>(null);
@@ -149,6 +151,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apply(await fb<TokenResp>("signInWithIdp", { postBody: `id_token=${googleIdToken}&providerId=google.com`, requestUri: "http://localhost", returnIdpCredential: true, returnSecureToken: true }));
     },
     resetPassword: async (email) => { await fb("sendOobCode", { requestType: "PASSWORD_RESET", email: email.trim() }); },
+    updateDisplayProfile: async (name, photoUrl) => {
+      if (!user) throw new AuthError("Please sign in to edit your profile.");
+      const currentToken = await freshToken();
+      const result = await fb<TokenResp>("update", {
+        idToken: currentToken,
+        displayName: name.trim(),
+        photoUrl: photoUrl.trim(),
+        returnSecureToken: true,
+      });
+      await apply({ ...result, localId: result.localId || user.uid, email: result.email || user.email, displayName: name.trim(), photoUrl: photoUrl.trim() || undefined });
+    },
+    requestEmailChange: async (email) => {
+      if (!user) throw new AuthError("Please sign in to change your email.");
+      const nextEmail = email.trim().toLowerCase();
+      if (!nextEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(nextEmail)) throw new AuthError("Please enter a valid email address.");
+      if (nextEmail === user.email.toLowerCase()) throw new AuthError("This is already your account email.");
+      await fb("sendOobCode", { requestType: "VERIFY_AND_CHANGE_EMAIL", idToken: await freshToken(), newEmail: nextEmail });
+    },
     signOut: async () => {
       token.current = null;
       await sessionStore.deleteItemAsync(KEY).catch(() => {});

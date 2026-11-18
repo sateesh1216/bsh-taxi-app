@@ -9,7 +9,7 @@ type Props = { children: ReactNode; style?: StyleProp<ViewStyle>; strong?: boole
 export function GlassCard({ children, style, strong, r = radius.lg }: Props) {
   return (
     <View style={[styles.wrap, { borderRadius: r }, style]}>
-      <BlurView intensity={35} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={35} tint="light" style={StyleSheet.absoluteFill} />
       <View style={[StyleSheet.absoluteFill, { backgroundColor: strong ? colors.glassStrong : colors.glass }]} />
       {children}
     </View>

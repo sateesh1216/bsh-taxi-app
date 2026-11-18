@@ -62,9 +62,13 @@ export default function Bookings() {
                   </View>
                   {route ? <Text style={s.route}>{route}</Text> : null}
                   <Text style={s.meta}>
-                    {isLocal || !num ? "" : `No. ${num} · `}
-                    {dateStr}
+                    {isLocal || !num ? "" : `Enquiry no. ${num} · `}
+                    {dateStr} · Enquiry saved
                   </Text>
+                  <View style={s.actions}>
+                    <Button label="View details" variant="glass" onPress={() => router.push({ pathname: "/confirmed", params: { number: num } })} style={{ flex: 1 }} />
+                    <Button label="Book again" onPress={() => router.push({ pathname: "/book", params: { rebook: num } })} style={{ flex: 1 }} />
+                  </View>
                 </GlassCard>
               </Pressable>
             );
@@ -84,4 +88,5 @@ const s = StyleSheet.create({
   fare: { fontFamily: fonts.bold, fontSize: 14, color: colors.amber },
   route: { marginTop: 4, fontFamily: fonts.body, fontSize: 14, color: colors.white },
   meta: { marginTop: 4, fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
+  actions: { flexDirection: "row", gap: 8, marginTop: 12 },
 });

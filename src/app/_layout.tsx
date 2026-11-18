@@ -23,7 +23,7 @@ export default function RootLayout() {
   return (
     <LangProvider>
       <AuthProvider>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.navy } }} />
       </AuthProvider>
     </LangProvider>
