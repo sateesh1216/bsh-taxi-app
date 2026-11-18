@@ -6,6 +6,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { Fraunces_700Bold } from "@expo-google-fonts/fraunces";
 import { PublicSans_400Regular, PublicSans_600SemiBold, PublicSans_700Bold } from "@expo-google-fonts/public-sans";
 import { colors } from "../theme/colors";
+import { AuthProvider } from "../lib/auth";
+import { LangProvider } from "../lib/i18n";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,9 +21,11 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <>
-      <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.navy } }} />
-    </>
+    <LangProvider>
+      <AuthProvider>
+        <StatusBar style="light" />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.navy } }} />
+      </AuthProvider>
+    </LangProvider>
   );
 }

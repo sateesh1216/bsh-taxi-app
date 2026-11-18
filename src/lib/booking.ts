@@ -1,5 +1,8 @@
 import { CAR_TYPES, LOCAL_FARES, LOCAL_PACKAGES, TERMS_AND_CONDITIONS, TOUR_FARES, TOUR_PACKAGES, type CarId, type LocalPackageId, type TourId } from "../data/catalog";
 import type { BookingPayload, PayNowPayload } from "./api";
+import type { Key } from "./i18n";
+
+export type Account = { email: string };
 
 export type ServiceKind = "local" | "outstation" | "airport" | "tour";
 export const KINDS: ServiceKind[] = ["local", "outstation", "airport", "tour"];
@@ -60,16 +63,22 @@ export function fareFor(d: Draft): number | null {
   return null;
 }
 
-export function validate(d: Draft): string | null {
-  if (d.kind === "local" && d.pickup.trim().length < 3) return "Please enter your pickup address.";
-  if (d.kind === "outstation" && (d.pickup.trim().length < 2 || d.drop.trim().length < 2)) return "Please enter pickup and drop locations.";
-  if (d.kind === "airport" && d.pickup.trim().length < 2) return d.fromAirport ? "Please enter where we should drop you." : "Please enter your pickup location.";
-  if (d.name.trim().length < 2) return "Please enter your name.";
-  if (!cleanIndianMobile(d.mobile)) return "Please enter a valid 10-digit mobile number.";
-  const email = d.email.trim();
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Please enter a valid email address.";
+export function validateTrip(d: Draft): Key | null {
+  if (d.kind === "local" && d.pickup.trim().length < 3) return "v_pickup_addr";
+  if (d.kind === "outstation" && (d.pickup.trim().length < 2 || d.drop.trim().length < 2)) return "v_pickup_drop";
+  if (d.kind === "airport" && d.pickup.trim().length < 2) return d.fromAirport ? "v_airport_drop" : "v_airport_pickup";
   return null;
 }
+
+export function validateContact(d: Draft): Key | null {
+  if (d.name.trim().length < 2) return "v_name";
+  if (!cleanIndianMobile(d.mobile)) return "v_mobile";
+  const email = d.email.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "v_email";
+  return null;
+}
+
+export const validate = (d: Draft): Key | null => validateTrip(d) ?? validateContact(d);
 
 export function rows(d: Draft): { label: string; value: string }[] {
   const c = car(d);
@@ -84,25 +93,26 @@ export function rows(d: Draft): { label: string; value: string }[] {
   return r;
 }
 
-export function buildPayload(d: Draft): BookingPayload {
+export function buildPayload(d: Draft, account?: Account): BookingPayload {
   const c = car(d);
-  const base = { customer_name: d.name.trim(), mobile: cleanIndianMobile(d.mobile) ?? d.mobile.trim(), customer_email: d.email.trim() || undefined, vehicle: c.name, passengers: c.seats };
+  const base = { customer_name: d.name.trim(), mobile: cleanIndianMobile(d.mobile) ?? d.mobile.trim(), customer_email: d.email.trim() || account?.email || undefined, vehicle: c.name, passengers: c.seats };
+  const who = account?.email ? ` App account: ${account.email}.` : "";
   const fare = fareFor(d);
   if (d.kind === "local") {
-    return { ...base, service_type: SERVICE_TYPE.local, pickup_location: d.pickup.trim(), drop_location: d.pickup.trim(), travel_date: toISODate(d.date), travel_time: toHHMM(d.time), notes: `Local package: ${localPkg(d).label}. Fare shown in app: ${formatCurrency(fare)}. Booked from app.` };
+    return { ...base, service_type: SERVICE_TYPE.local, pickup_location: d.pickup.trim(), drop_location: d.pickup.trim(), travel_date: toISODate(d.date), travel_time: toHHMM(d.time), notes: `Local package: ${localPkg(d).label}. Fare shown in app: ${formatCurrency(fare)}. Booked from app.${who}` };
   }
   if (d.kind === "outstation") {
-    return { ...base, service_type: SERVICE_TYPE.outstation, pickup_location: d.pickup.trim(), drop_location: d.drop.trim(), travel_date: toISODate(d.date), travel_time: toHHMM(d.time), notes: `${d.round ? "Round Trip" : "One Way"}. Fare to be confirmed on call. Booked from app.` };
+    return { ...base, service_type: SERVICE_TYPE.outstation, pickup_location: d.pickup.trim(), drop_location: d.drop.trim(), travel_date: toISODate(d.date), travel_time: toHHMM(d.time), notes: `${d.round ? "Round Trip" : "One Way"}. Fare to be confirmed on call. Booked from app.${who}` };
   }
   if (d.kind === "airport") {
-    return { ...base, service_type: SERVICE_TYPE.airport, pickup_location: d.fromAirport ? AIRPORT : d.pickup.trim(), drop_location: d.fromAirport ? d.pickup.trim() : AIRPORT, travel_date: toISODate(d.date), travel_time: toHHMM(d.time), notes: `${d.fromAirport ? "Airport to City" : "City to Airport"}. Fare to be confirmed on call. Booked from app.` };
+    return { ...base, service_type: SERVICE_TYPE.airport, pickup_location: d.fromAirport ? AIRPORT : d.pickup.trim(), drop_location: d.fromAirport ? d.pickup.trim() : AIRPORT, travel_date: toISODate(d.date), travel_time: toHHMM(d.time), notes: `${d.fromAirport ? "Airport to City" : "City to Airport"}. Fare to be confirmed on call. Booked from app.${who}` };
   }
   const t = tourPkg(d);
-  return { ...base, service_type: SERVICE_TYPE.tour, tour_package_type: t.name, travel_date: toISODate(d.date), notes: `Tour: ${t.name} (${t.days}D/${t.nights}N). Fare shown in app: ${formatCurrency(fare)}. Booked from app.` };
+  return { ...base, service_type: SERVICE_TYPE.tour, tour_package_type: t.name, travel_date: toISODate(d.date), notes: `Tour: ${t.name} (${t.days}D/${t.nights}N). Fare shown in app: ${formatCurrency(fare)}. Booked from app.${who}` };
 }
 
-export function buildPayNow(d: Draft): PayNowPayload {
-  return { ...buildPayload(d), planA: d.kind === "tour" ? d.tourId : d.localPkg, vehicle_key: d.carId };
+export function buildPayNow(d: Draft, account?: Account): PayNowPayload {
+  return { ...buildPayload(d, account), planA: d.kind === "tour" ? d.tourId : d.localPkg, vehicle_key: d.carId };
 }
 
 export function whatsappMessage(d: Draft, enquiryNumber?: string): string {

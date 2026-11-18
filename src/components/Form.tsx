@@ -9,9 +9,9 @@ export function Label({ children }: { children: string }) {
   return <Text style={s.label}>{children}</Text>;
 }
 
-type FieldProps = { label: string; value: string; onChangeText: (t: string) => void; placeholder?: string; keyboardType?: KeyboardTypeOptions; autoCapitalize?: "none" | "words" | "sentences" };
+type FieldProps = { label: string; value: string; onChangeText: (t: string) => void; placeholder?: string; keyboardType?: KeyboardTypeOptions; autoCapitalize?: "none" | "words" | "sentences"; secure?: boolean };
 
-export function Field({ label, value, onChangeText, placeholder, keyboardType, autoCapitalize = "words" }: FieldProps) {
+export function Field({ label, value, onChangeText, placeholder, keyboardType, autoCapitalize = "words", secure }: FieldProps) {
   return (
     <View style={{ gap: 6 }}>
       <Label>{label}</Label>
@@ -24,6 +24,8 @@ export function Field({ label, value, onChangeText, placeholder, keyboardType, a
           placeholderTextColor="rgba(255,255,255,0.5)"
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          secureTextEntry={secure}
+          autoCorrect={!secure}
           style={s.input}
         />
       </GlassCard>

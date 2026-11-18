@@ -29,7 +29,7 @@ WhatsApp: the website opens `wa.me` with a prefilled message (incl. Terms & Cond
 | `/services/local-taxi` | Hourly / Local rental | 1 |
 | `/outstation/:slug`, `/destinations`, `/destinations/:slug` | Routes + Tour Packages | 1 |
 | `/contact`, `/about` | Contact, About (inside Profile) | 1 |
-| `/google-reviews` | Reviews | 2 |
+| `/google-reviews` | Reviews + FAQs | done |
 | `/payment/result` | Payment result | 1 |
 | `/privacy-policy`, `/terms` | Legal | 2 |
 
@@ -67,22 +67,22 @@ Status key: [ ] not started, [~] in progress, [x] done and tested
 
 ### Phase 1: Core booking
 - [x] Home (service chips, route box and popular routes open the booking screen; call and WhatsApp work)
-- [~] Location input: plain text fields for now (website autocomplete via Photon not ported yet)
+- [x] Location input: live suggestions (Photon, Vizag-biased) + popular places, shown directly below the field
 - [x] Choose car with fixed fares (local + tour) or "fare on call" (outstation + airport), same rules as the website
 - [x] Local rental packages (8hr/80km, 10hr/100km)
 - [x] Send Enquiry (`/api/enquiries`) + WhatsApp message with terms. Built and typechecked, NOT yet tested against the live server
 - [x] Pay Now (Local, Tour): in-app browser, then status polling + invoice link. Built, NOT yet tested with a real payment
-- [~] Tours are bookable from the booking screen; separate Fleet / Routes / Destination detail screens not built yet
+- [x] Fleet, Services (+detail), Destinations (+detail), Outstation routes (+detail with fares), all from website data
 - [x] My Bookings (enquiries saved on this phone)
-- [ ] Profile, Contact, About
+- [x] Profile, Contact, About
 
 ### Phase 2: Polish
-- [ ] Reviews, Legal
+- [x] Reviews + FAQs, Privacy and Terms (text from the website)
 - [ ] Offline/error states, loading states
 - [ ] App icon, splash, store listing assets
 
 ### Phase 3: Needs backend work
-- [ ] OTP login
+- [~] Login: email + password and Google (Firebase) built, needs your Firebase keys (see SETUP_ACCOUNTS.md). Phone OTP not built (needs SMS provider)
 - [ ] Live trip + driver details
 - [ ] Rating + receipts
 - [ ] Wallet, offers, referral
@@ -109,3 +109,41 @@ Status key: [ ] not started, [~] in progress, [x] done and tested
 - Booking logic has a scripted check (fares, validation, payloads for all 4 services). Both iOS and Android bundles build.
 - To test safely: use an obviously fake name (e.g. "TEST") for the first enquiry so the team can ignore it.
 - Website note (not copied into the app): the admin unlock value is hard-coded in the public website JavaScript, so anyone can find it.
+
+## 9. Website content in the app (Phase 1b)
+
+- Exported from the website data files into `src/data/site/*.json` (9 destinations, 28 outstation routes, 6 services with long text, fleet, 6 reviews, 4 FAQs, About, Contact, Privacy/Terms, popular places). Rich-text descriptions were converted to plain text.
+- 28 images bundled (compressed, about 2.3 MB total). Path to image map: `src/data/images.ts`.
+- Search: Home and Explore tab search destinations, outstation routes and services; results open directly below the box. Address fields use live Photon search.
+- Outstation fares follow the website rules: fixed round-trip price for 8 listed routes, otherwise per-km rate + estimate.
+- Tabs are now Home, Bookings, Explore, Profile (the Offers tab was replaced, offers are not on the website).
+
+### Website data conflicts to resolve (needs the owner)
+
+Local taxi package fares differ between three places in the website code:
+
+| Source | Dzire 8hr/80km | Ertiga 8hr/80km | Innova 8hr/80km | Tempo 8hr/80km |
+|---|---|---|---|---|
+| Booking form (`BookingWizard`), used by the app booking screen | 2,500 | 3,200 | 3,500 | 5,500 |
+| `fixedPrices.ts` | 2,500 | 3,000 | (see file) | (see file) |
+| Service page (`ServiceDetails`) | 2,000 | 2,400 | 2,900 | 4,800 |
+
+Pay Now amounts are calculated by the server, so the server table is the real price. Decide which table is correct, then update the others (app and website).
+
+## 10. Accounts, saved places, Telugu (Phase 1c)
+
+- Accounts via Firebase Authentication REST API (email + password, password reset, Google sign-in, guest mode). Session kept in secure storage, refreshed on launch. In-app account deletion.
+- Without `EXPO_PUBLIC_FIREBASE_API_KEY` the app runs as a guest (see section 11 for what the Sign in screen shows).
+- Signed-in users: name/email prefilled in the booking form, account email added to the enquiry notes and `customer_email`, bookings kept per account (guest bookings are moved into the account at sign-in; cloud copy is described in section 11).
+- Saved places (Home, Office) in Profile, offered first in pickup suggestions.
+- Language: English / Telugu toggle in Profile. Telugu covers tabs, Home, booking form and errors, confirmation, login, profile and bookings. Website content (destinations, fares, reviews, About) stays English. Telugu text was written by the assistant, please have a Telugu speaker review it.
+- Verified: typecheck, iOS + Android bundles, payload tests. NOT verified: sign-in against a real Firebase project (sandbox could not reach Google), Google sign-in, Telugu rendering on a device.
+- Not done: phone OTP, notifications, live trip tracking, rating, wallet.
+
+## 11. Cloud account data and simpler booking flow (Phase 1d)
+
+- Bookings and saved places are saved to the signed-in user's account in Firestore (REST, `users/{uid}`), merged with the phone's copy, pushed again if offline at the time. Security rules in `firestore.rules`.
+- Booking is now 3 steps (Trip, Car, Confirm) with a fixed bottom action bar and a progress bar. Home is shorter: Where to, 4 big service tiles, Home/Office shortcuts, last booking, popular trips.
+- "Sign in" is always visible. Until the Firebase keys are added, the Sign in screen shows the owner setup steps (Firebase project, Firestore rules, two keys in `.env`) instead of a dead end; Profile always shows the Sign in card.
+- Verified: typecheck, iOS + Android bundles, simulated Firestore request and parse tests, booking tests. NOT verified: real Firebase sign-up and sync, how the new screens look on a phone.
+- Limits: enquiries from the website or phone are not linked to app accounts; team status updates do not reach the app (needs backend work).

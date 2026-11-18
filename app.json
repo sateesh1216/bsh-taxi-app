@@ -28,7 +28,8 @@
       "expo-font",
       "expo-web-browser",
       "expo-splash-screen",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-secure-store"
     ],
     "scheme": "bshtaxi",
     "backgroundColor": "#060F24"

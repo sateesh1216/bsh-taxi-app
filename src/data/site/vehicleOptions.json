@@ -1,0 +1,50 @@
+[
+ {
+  "slug": "swift-dzire",
+  "name": "Swift Dzire",
+  "category": "Sedan",
+  "seats": 4,
+  "bags": 2,
+  "basePackageKm": 80,
+  "basePackagePrice": 2400,
+  "extraKmRate": 13,
+  "extraHourRate": 150,
+  "bestFor": "Solo or two-passenger business trips and quick outstation runs."
+ },
+ {
+  "slug": "ertiga",
+  "name": "Ertiga",
+  "category": "MUV",
+  "seats": 6,
+  "bags": 3,
+  "basePackageKm": 80,
+  "basePackagePrice": 2800,
+  "extraKmRate": 16,
+  "extraHourRate": 180,
+  "bestFor": "Families of 5–6 travelling together with moderate luggage."
+ },
+ {
+  "slug": "innova-crysta",
+  "name": "Innova Crysta",
+  "category": "Premium SUV",
+  "seats": 7,
+  "bags": 4,
+  "basePackageKm": 80,
+  "basePackagePrice": 3200,
+  "extraKmRate": 19,
+  "extraHourRate": 200,
+  "bestFor": "Comfortable long-distance, pilgrimage, and airport-adjacent trips."
+ },
+ {
+  "slug": "tempo-traveller",
+  "name": "Tempo Traveller",
+  "category": "Group Travel",
+  "seats": 17,
+  "bags": 10,
+  "basePackageKm": 80,
+  "basePackagePrice": 5200,
+  "extraKmRate": 28,
+  "extraHourRate": 300,
+  "bestFor": "Large groups, family functions, and pilgrimage tours."
+ }
+]

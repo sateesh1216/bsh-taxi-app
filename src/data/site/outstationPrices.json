@@ -1,0 +1,82 @@
+{
+ "outstationPrices": {
+  "vizag-to-araku-taxi": {
+   "swift-dzire": 5000,
+   "ertiga": 6500,
+   "innova-crysta": 8000,
+   "tempo-traveller": 12000
+  },
+  "vizag-to-vizianagaram-taxi": {
+   "swift-dzire": 3000,
+   "ertiga": 3500,
+   "innova-crysta": 4000,
+   "tempo-traveller": 8000
+  },
+  "vizag-to-srikakulam-taxi": {
+   "swift-dzire": 3500,
+   "ertiga": 4500,
+   "innova-crysta": 7000,
+   "tempo-traveller": 12000
+  },
+  "vizag-to-annavaram-taxi": {
+   "swift-dzire": 5000,
+   "ertiga": 6500,
+   "innova-crysta": 8000,
+   "tempo-traveller": 12000
+  },
+  "vizag-to-arasavalli-taxi": {
+   "swift-dzire": 5000,
+   "ertiga": 6500,
+   "innova-crysta": 8000,
+   "tempo-traveller": 12000
+  },
+  "vizag-to-bobbili-taxi": {
+   "swift-dzire": 3800,
+   "ertiga": 4700,
+   "innova-crysta": 5600,
+   "tempo-traveller": 8200
+  },
+  "vizag-to-lambasingi-taxi": {
+   "swift-dzire": 5000,
+   "ertiga": 6500,
+   "innova-crysta": 8000,
+   "tempo-traveller": 12000
+  },
+  "vizag-to-srimukhalingam-taxi": {
+   "swift-dzire": 5000,
+   "ertiga": 6500,
+   "innova-crysta": 8000,
+   "tempo-traveller": 12000
+  }
+ },
+ "perKmRates": {
+  "swift-dzire": 14,
+  "ertiga": 17,
+  "innova-crysta": 20,
+  "tempo-traveller": 30
+ },
+ "oneWayDistanceKm": {
+  "vizag-to-kakinada-taxi": 140,
+  "vizag-to-vijayawada-taxi": 350,
+  "vizag-to-rajahmundry-taxi": 240,
+  "vizag-to-bangalore-taxi": 990,
+  "vizag-to-bhadrachalam-taxi": 330,
+  "vizag-to-bhubaneswar-taxi": 455,
+  "vizag-to-jagdalpur-taxi": 330,
+  "vizag-to-kolkata-taxi": 895,
+  "vizag-to-raipur-taxi": 550,
+  "vizag-to-razam-taxi": 150,
+  "vizag-to-tirupati-taxi": 770,
+  "vizag-to-tuni-taxi": 100
+ },
+ "FIXED_PRICE_SLUGS": [
+  "vizag-to-araku-taxi",
+  "vizag-to-vizianagaram-taxi",
+  "vizag-to-srikakulam-taxi",
+  "vizag-to-annavaram-taxi",
+  "vizag-to-arasavalli-taxi",
+  "vizag-to-bobbili-taxi",
+  "vizag-to-lambasingi-taxi",
+  "vizag-to-srimukhalingam-taxi"
+ ]
+}

@@ -1,0 +1,26 @@
+[
+ {
+  "name": "Swift Dzire",
+  "seats": 4
+ },
+ {
+  "name": "Ertiga",
+  "seats": 6
+ },
+ {
+  "name": "Innova Crysta",
+  "seats": 7
+ },
+ {
+  "name": "12 Seater",
+  "seats": 12
+ },
+ {
+  "name": "Tempo Traveller",
+  "seats": 17
+ },
+ {
+  "name": "Urbania",
+  "seats": 16
+ }
+]

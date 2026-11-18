@@ -1,0 +1,92 @@
+{
+ "local-taxi": {
+  "tagline": "Affordable Local Taxi Service in Vizag",
+  "longDescription": "Need a taxi for city travel? BSH Taxi Services offers the best local taxi service in Vizag for shopping trips, office commutes, hospital visits, sightseeing, and everyday errands around Visakhapatnam. Choose from flexible hourly packages with a fixed kilometre allowance, so you get a comfortable ride without worrying about surprise charges. Our local drivers know the city well and get you there quickly and safely. Book your local taxi in Vizag today for convenient, on-demand city travel with BSH Taxi Services.",
+  "highlights": [
+   "Flexible Hourly & KM Packages",
+   "On-Demand City Rides",
+   "Local Drivers Who Know Vizag Well",
+   "No Hidden Charges, Fixed Package Fares"
+  ],
+  "notes": [
+   "Package includes a fixed number of hours and kilometres; extra usage is billed as per the rate card.",
+   "Waiting time beyond the package allowance is chargeable.",
+   "Driver allowance applies for late-night bookings."
+  ]
+ },
+ "outstation-taxi": {
+  "tagline": "Reliable Outstation Taxi Service in Vizag",
+  "longDescription": "Planning a trip outside the city? BSH Taxi Services offers the best outstation taxi service in Vizag for one-way drops, round trips, and multi-day travel across Andhra Pradesh and nearby states. Whether you're traveling for business, family vacations, temple visits, or sightseeing, our outstation taxi in Vizag ensures a safe, comfortable, and affordable journey. We provide reliable one-way taxi and outstation cab services with experienced highway drivers, well-maintained vehicles, transparent pricing, and 24/7 customer support. Popular routes include Vizag to Araku, Vizag to Tirupati, Vizag to Vijayawada, and Vizag to Hyderabad. Book your outstation taxi in Vizag today and enjoy a hassle-free travel experience with BSH Taxi Services.",
+  "highlights": [
+   "One-Way & Round Trip Taxi Service",
+   "24/7 Outstation Cab Booking",
+   "Experienced Highway Drivers",
+   "Affordable Pricing with No Hidden Charges"
+  ],
+  "notes": [
+   "For one-way trips, the fare is calculated based on the total distance of both the onward and return journey.",
+   "Round trips include a minimum daily kilometre package.",
+   "Driver allowance, toll, and permit charges are extra."
+  ]
+ },
+ "airport-transfer": {
+  "tagline": "Reliable Airport Taxi Service in Vizag",
+  "longDescription": "Need a reliable airport taxi in Vizag? BSH Taxi Services provides safe, affordable, and 24/7 airport transfer services to and from Visakhapatnam International Airport. Whether you're catching an early morning flight or arriving late at night, our professional drivers ensure on-time pickups and drop-offs with comfortable, well-maintained vehicles. We monitor your flight schedule to provide timely service, helping you avoid unnecessary waiting. Book your airport taxi in Vizag today for a smooth, hassle-free, and stress-free travel experience.",
+  "highlights": [
+   "24/7 Airport Pickup & Drop Service",
+   "On-Time Airport Transfers",
+   "Flight Tracking for Timely Pickups",
+   "Experienced & Professional Drivers"
+  ],
+  "notes": [
+   "Free waiting time of 30 minutes from flight landing.",
+   "Fare is fixed for the selected route.",
+   "Additional stops en route are chargeable."
+  ]
+ },
+ "tour-packages": {
+  "tagline": "Explore the Best Tour Packages from Vizag",
+  "longDescription": "Discover the beauty of Andhra Pradesh with BSH Taxi Services' affordable and customizable tour packages from Vizag. Whether you're planning an Araku Valley tour, Lambasingi trip, Annavaram Temple visit, Simhachalam Darshan, Borra Caves adventure, or a family sightseeing tour, we provide safe, comfortable, and reliable travel. Our experienced drivers, well-maintained vehicles, and flexible itineraries ensure a hassle-free journey for families, couples, groups, and corporate travelers. Book the best tour package in Vizag today and explore Andhra Pradesh's top tourist destinations at your own pace with BSH Taxi Services.",
+  "highlights": [
+   "Customized Vizag & Andhra Pradesh Tour Packages",
+   "Popular Destinations: Araku, Lambasingi & Borra Caves",
+   "Comfortable Vehicles with Experienced Drivers",
+   "Affordable Packages with Flexible Itineraries"
+  ],
+  "notes": [
+   "Itinerary and pricing depend on the destinations chosen.",
+   "Entry tickets and guide fees (if any) are not included.",
+   "Overnight halts include driver allowance charges."
+  ]
+ },
+ "corporate-travel": {
+  "tagline": "Reliable Corporate Taxi Service in Vizag",
+  "longDescription": "BSH Taxi Services provides reliable and professional corporate taxi services for businesses of all sizes. Whether you need employee transportation, executive travel, client pickups, airport transfers, or event transportation, our corporate cab service ensures safe, comfortable, and punctual journeys. With experienced drivers, well-maintained vehicles, flexible booking options, transparent pricing, and convenient monthly billing, we make business travel simple and hassle-free. Book the best corporate taxi service in Visakhapatnam (Vizag) and enjoy dependable transportation tailored to your company's needs.",
+  "highlights": [
+   "Reliable Employee & Executive Transportation",
+   "Corporate Airport Transfers & Client Pickups",
+   "Flexible Monthly Billing with Transparent Pricing",
+   "Professional Drivers & Well-Maintained Vehicles"
+  ],
+  "notes": [
+   "Corporate rates apply for monthly or bulk bookings.",
+   "GST invoicing available on request.",
+   "Custom SLAs available for regular contracts."
+  ]
+ },
+ "wedding-car-rentals": {
+  "tagline": "Luxury Wedding Car Rentals in Vizag",
+  "longDescription": "Make your special day unforgettable with BSH Taxi Services' premium wedding car rental service in Vizag. We offer elegant, well-maintained wedding cars with professional chauffeurs to ensure a stylish, comfortable, and punctual arrival for your wedding ceremonies, receptions, engagements, and other special occasions. Whether you need a luxury sedan, SUV, or multiple vehicles for your family and guests, our wedding car rental service provides reliable transportation with flexible booking options and affordable pricing. Book the best wedding car rental in Visakhapatnam (Vizag) and celebrate your big day with comfort, elegance, and peace of mind.",
+  "highlights": [
+   "Luxury Wedding Cars with Professional Chauffeurs",
+   "Elegant Vehicles for Weddings & Special Events",
+   "Punctual Service with Flexible Booking Options",
+   "Affordable Wedding Car Rental in Vizag"
+  ],
+  "notes": [
+   "Vehicle availability is subject to advance booking.",
+   "Decoration and floral arrangements are available on request at extra cost.",
+   "Booking is confirmed only after advance payment."
+  ]
+ }
+}

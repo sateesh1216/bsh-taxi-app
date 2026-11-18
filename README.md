@@ -10,9 +10,10 @@ npm run typecheck
 ```
 (`.npmrc` sets `legacy-peer-deps=true` because one icon package has an optional peer conflict.)
 
-## Config (.env)
+## Config (.env, see .env.example)
 - `EXPO_PUBLIC_API_URL`      backend base URL (no trailing /api)
 - `EXPO_PUBLIC_COMPANY_KEY`  `BSH`
+- `EXPO_PUBLIC_FIREBASE_API_KEY` and Google client IDs: accounts, see `SETUP_ACCOUNTS.md` (empty = guest only)
 
 ## Structure
 - `src/app`         screens (Expo Router). `(tabs)` = Home, Bookings, Offers, Profile

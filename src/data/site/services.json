@@ -1,0 +1,38 @@
+[
+ {
+  "slug": "local-taxi",
+  "title": "Vizag Local Tour Packages",
+  "description": "Book reliable local taxi services in Visakhapatnam (Vizag) with BSH Taxi Services. We provide comfortable cabs for city travel, shopping, business meetings, sightseeing, railway station transfers, and daily commuting at affordable prices.",
+  "image": "/assets/Our Services car img's/vizag-local-taxi-services-bshtaxiservices.webp"
+ },
+ {
+  "slug": "outstation-taxi",
+  "title": "Outstation Taxi Service from Vizag",
+  "description": "Travel safely with our outstation taxi service from Visakhapatnam (Vizag). We offer one-way and round-trip cab services to Araku, Hyderabad, Vijayawada, Tirupati, Kakinada, Srikakulam, and many other destinations across Andhra Pradesh.",
+  "image": "/assets/Our Services car img's/outstation-bshtaxiservices.webp"
+ },
+ {
+  "slug": "airport-transfer",
+  "title": "Alluri sitarama raju international airport",
+  "description": "Book 24/7 airport taxi services in Visakhapatnam (Vizag) for airport pickup and drop. Our professional drivers ensure safe, punctual, and affordable transfers to and from Visakhapatnam Airport.",
+  "image": "/assets/Our Services car img's/vizag-airport-taxi-services-bshtaxiservices.webp"
+ },
+ {
+  "slug": "tour-packages",
+  "title": "Tour Packages",
+  "description": "Explore the best Visakhapatnam tour packages with BSH Taxi Services. Book comfortable cabs for Araku Valley, Borra Caves, Lambasingi, Simhachalam, and other popular tourist destinations with experienced drivers.",
+  "image": "/assets/Our Services car img's/Tourpackages-bshtaxiservices.webp"
+ },
+ {
+  "slug": "corporate-travel",
+  "title": "Corporate Taxi Services",
+  "description": "BSH Taxi Services provides reliable corporate taxi services in Visakhapatnam for business meetings, airport transfers, employee transportation, and corporate events with professional drivers and premium vehicles.",
+  "image": "/assets/Our Services car img's/Corporate- taxi-services-bshtaxiservices.webp"
+ },
+ {
+  "slug": "wedding-car-rentals",
+  "title": "Wedding Car Rental in Visakhapatnam",
+  "description": "Book luxury wedding car rentals in Visakhapatnam (Vizag) for weddings, receptions, engagements, and special occasions. Choose from premium cars with professional chauffeurs for a memorable experience.",
+  "image": "/assets/Our Services car img's/Wedding-Car-Rentals-bshtaxiservices.webp"
+ }
+]

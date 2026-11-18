@@ -1,0 +1,46 @@
+[
+ {
+  "id": "office",
+  "title": "Our Office",
+  "lines": [
+   "44-66, Palanati Colony,",
+   "Srinivasa Nagar, Kancharapalem, Visakhapatnam,",
+   "Andhra Pradesh - 530008"
+  ]
+ },
+ {
+  "id": "call",
+  "title": "Call Us",
+  "lines": [
+   "+91 8886803322",
+   "Mon - Sun: 24/7 Available"
+  ],
+  "href": "tel:+918886803322"
+ },
+ {
+  "id": "email",
+  "title": "Email Us",
+  "lines": [
+   "info.bshtaxiservices@gmail.com",
+   "We reply within 30 minutes"
+  ],
+  "href": "mailto:info.bshtaxiservices@gmail.com"
+ },
+ {
+  "id": "hours",
+  "title": "Working Hours",
+  "lines": [
+   "Monday - Sunday",
+   "24 Hours / 7 Days"
+  ]
+ },
+ {
+  "id": "whatsapp",
+  "title": "WhatsApp",
+  "lines": [
+   "+91 8886803322",
+   "Chat with us on WhatsApp"
+  ],
+  "href": "https://wa.me/918886803322"
+ }
+]
