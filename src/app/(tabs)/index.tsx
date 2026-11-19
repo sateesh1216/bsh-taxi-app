@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,16 +25,31 @@ const QUICK_BOOK: { type: "local" | "outstation" | "airport" | "tour"; key: Key;
   { type: "tour", key: "svc_tours", icon: "map", noteKey: "local_driver_hint" },
 ];
 
+type ActiveOffer = { id: string; title: string; message: string; actionLabel?: string };
+// Add only verified, currently-active promotions here. Empty means no popup.
+const ACTIVE_OFFERS: ActiveOffer[] = [];
+
 export default function Home() {
   const { t } = useT();
   const { user } = useAuth();
   const [saved, setSaved] = useState<SavedPlaces>({ home: "", office: "" });
   const [last, setLast] = useState<SavedEnquiry | null>(null);
+  const [offerPopup, setOfferPopup] = useState<ActiveOffer | null>(null);
 
   useFocusEffect(useCallback(() => {
     getSavedPlaces().then(setSaved);
     listEnquiries().then((items) => setLast(items[0] ?? null));
   }, [user]));
+
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    const offer = ACTIVE_OFFERS[0];
+    if (!offer) { setOfferPopup(null); return () => { active = false; }; }
+    AsyncStorage.getItem(`bsh_offer_dismissed_${offer.id}`).then((dismissed) => {
+      if (active && !dismissed) setOfferPopup(offer);
+    }).catch(() => { if (active) setOfferPopup(offer); });
+    return () => { active = false; };
+  }, []));
 
   const first = user ? (user.name || user.email).split(" ")[0] : "";
   const lastRoute = last ? last.rows.filter((r) => ["Pickup", "From", "To", "Package"].includes(r.label)).map((r) => r.value).join(" → ") : "";
@@ -139,7 +155,31 @@ export default function Home() {
         <View style={s.helpActions}><Button label="Call us" onPress={callSupport} style={{ flex: 1 }} /><Button label="WhatsApp" variant="outline" onPress={() => whatsappSupport()} style={{ flex: 1 }} /></View>
       </GlassCard>
       <Button label="Explore all services and routes" variant="glass" onPress={() => router.push("/explore")} style={{ marginTop: 14 }} />
-    </Screen>
+          <Modal visible={!!offerPopup} transparent animationType="fade" onRequestClose={() => {
+        if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+        setOfferPopup(null);
+      }}>
+        <View style={s.offerOverlay}>
+          <View style={s.offerModal}>
+            <Pressable style={s.offerClose} onPress={() => {
+              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+              setOfferPopup(null);
+            }}><Ionicons name="close" size={22} color={colors.text} /></Pressable>
+            <Ionicons name="gift-outline" size={36} color={colors.primary} />
+            <Text style={s.offerTitle}>{offerPopup?.title}</Text>
+            <Text style={s.offerMessage}>{offerPopup?.message}</Text>
+            <Button label={offerPopup?.actionLabel || "View offers"} onPress={() => {
+              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+              setOfferPopup(null); router.push("/offers");
+            }} />
+            <Pressable onPress={() => {
+              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+              setOfferPopup(null);
+            }}><Text style={s.offerDismiss}>Not now</Text></Pressable>
+          </View>
+        </View>
+      </Modal>
+</Screen>
   );
 }
 
@@ -213,4 +253,10 @@ const s = StyleSheet.create({
   helpTitle: { fontFamily: fonts.heading, fontSize: 17, color: colors.white },
   helpText: { marginTop: 3, fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
   helpActions: { flexDirection: "row", gap: 10 },
+  offerOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center", padding: 22 },
+  offerModal: { width: "100%", maxWidth: 420, backgroundColor: colors.white, borderRadius: 22, padding: 24, alignItems: "center", gap: 12 },
+  offerClose: { alignSelf: "flex-end", padding: 4 },
+  offerTitle: { fontFamily: fonts.heading, fontSize: 22, color: colors.white, textAlign: "center" },
+  offerMessage: { fontFamily: fonts.body, fontSize: 14, color: colors.textMuted, lineHeight: 21, textAlign: "center" },
+  offerDismiss: { color: colors.textMuted, fontFamily: fonts.semibold, paddingVertical: 8 },
 });

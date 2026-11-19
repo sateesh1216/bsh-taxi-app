@@ -68,8 +68,11 @@ export default function PaymentResult() {
   const color = outcome === "success" ? colors.amber : outcome === "pending" ? colors.white : colors.danger;
   const rows = [
     ...(number ? [{ label: "Enquiry no.", value: number }] : []),
-    ...(ref ? [{ label: "Reference", value: ref }] : []),
+    ...(ref ? [{ label: "Payment reference", value: ref }] : []),
+    ...(info?.transaction_id ? [{ label: "Gateway transaction ID", value: info.transaction_id }] : []),
+    ...(info?.payment_mode ? [{ label: "Payment method", value: info.payment_mode }] : []),
     ...(info && outcome === "success" ? [{ label: "Amount paid", value: formatCurrency(info.paid_amount ?? info.amount) }] : []),
+    ...(info?.paid_at ? [{ label: "Paid at", value: info.paid_at }] : []),
   ];
 
   return (
@@ -83,7 +86,6 @@ export default function PaymentResult() {
       <View style={{ gap: 10, marginTop: 20 }}>
         {gaveUp && outcome === "pending" && <Button label="Check again" onPress={() => { polls.current = 0; setGaveUp(false); check(); }} />}
         {info?.invoice?.pdf_url && outcome === "success" && <Button label="View invoice" onPress={() => WebBrowser.openBrowserAsync(info.invoice!.pdf_url)} />}
-        {outcome === "success" && <Button label="My bookings" variant="glass" onPress={() => router.replace("/bookings")} />}
         {outcome !== "success" && outcome !== "pending" && <Button label="Try again" onPress={() => router.replace("/book")} />}
         <Button label="Need help? WhatsApp" variant="glass" onPress={() => whatsappSupport(`Hi BSH Taxi Services, I need help with my payment${ref ? ` (ref: ${ref})` : ""}.`)} />
         <Button label="Back to Home" variant="outline" onPress={() => router.replace("/")} />

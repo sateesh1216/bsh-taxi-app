@@ -11,3 +11,7 @@ export const REQUIRE_LOGIN = (process.env.EXPO_PUBLIC_REQUIRE_LOGIN ?? "true").t
 // Google sign-in is not supported by the backend yet (kept so GoogleButton still compiles).
 export const GOOGLE_CLIENT_IDS = { web: "", ios: "", android: "" };
 export const googleEnabled = false;
+
+// Compatibility fallbacks for legacy unused cloud sync
+export const FIREBASE_PROJECT_ID = "";
+export const cloudEnabled = false;

@@ -38,6 +38,7 @@ export default function DestinationDetail() {
 
       {prices.length > 0 && (
         <Section title={`Taxi fares${d.fleetPriceLabel ? ` (${d.fleetPriceLabel.toLowerCase()})` : ""}`}>
+          <Text style={{ fontSize: 13, lineHeight: 19, color: colors.textMuted, marginBottom: 10 }}>Fixed fare estimates are shown by vehicle. Confirm trip details and availability before booking. Online Pay Now is available only for booking types supported by the payment gateway.</Text>
           <GlassCard style={{ paddingHorizontal: 16, paddingVertical: 6 }}>
             {prices.map(([name, price], i) => (
               <View key={name} style={[s.priceRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.divider }]}>

@@ -2,9 +2,11 @@ export const colors = {
   // Clean white / cool-grey interface with restrained BSH blue accents.
   navy: "#FFFFFF",
   blue: "#155EEF",
+  primary: "#155EEF",
   amber: "#155EEF",
   amberLight: "#155EEF",
   white: "#1D2939",
+  text: "#1D2939",
   textMuted: "#667085",
   glass: "#FFFFFF",
   glassStrong: "#F8FAFC",
@@ -12,6 +14,7 @@ export const colors = {
   divider: "#EAECF0",
   danger: "#D92D20",
   page: "#FFFFFF",
+  bg: "#FFFFFF",
   surface: "#F8FAFC",
   accentSoft: "#EFF5FF",
 } as const;
