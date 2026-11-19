@@ -83,6 +83,7 @@ export default function PaymentResult() {
       <View style={{ gap: 10, marginTop: 20 }}>
         {gaveUp && outcome === "pending" && <Button label="Check again" onPress={() => { polls.current = 0; setGaveUp(false); check(); }} />}
         {info?.invoice?.pdf_url && outcome === "success" && <Button label="View invoice" onPress={() => WebBrowser.openBrowserAsync(info.invoice!.pdf_url)} />}
+        {outcome === "success" && <Button label="My bookings" variant="glass" onPress={() => router.replace("/bookings")} />}
         {outcome !== "success" && outcome !== "pending" && <Button label="Try again" onPress={() => router.replace("/book")} />}
         <Button label="Need help? WhatsApp" variant="glass" onPress={() => whatsappSupport(`Hi BSH Taxi Services, I need help with my payment${ref ? ` (ref: ${ref})` : ""}.`)} />
         <Button label="Back to Home" variant="outline" onPress={() => router.replace("/")} />

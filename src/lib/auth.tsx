@@ -1,11 +1,15 @@
+// Accounts on the BSH backend: POST /api/auth/signup | signin | refresh (email or phone + password).
+// The access token is short lived; the refresh token is kept in secure storage and used to renew it.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Platform } from "react-native";
 import { requireOptionalNativeModule } from "expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FIREBASE_API_KEY, authEnabled } from "./authConfig";
+import {
+  ApiError, apiDeleteAccount, apiForgotPassword, apiRefresh, apiResetPassword, apiSignIn, apiSignUp, setTokenHooks,
+  type AuthResult, type BackendUser,
+} from "./api";
 import { adoptGuestEnquiries } from "./storage";
 import { setScope } from "./scope";
-import { registerCloud } from "./cloud";
 
 type StoreApi = {
   getItemAsync: (key: string) => Promise<string | null>;
@@ -31,160 +35,164 @@ function getSessionStore(): StoreApi {
 
 const sessionStore = getSessionStore();
 
-export type AppUser = { uid: string; email: string; name: string; photo?: string };
+export type AppUser = { uid: string; email: string; name: string; phone: string; photo?: string };
 
 /** A message that is safe to show to the customer. */
 export class AuthError extends Error {}
 
-const FRIENDLY: [string, string][] = [
-  ["EMAIL_EXISTS", "An account with this email already exists. Please sign in."],
-  ["INVALID_LOGIN_CREDENTIALS", "Incorrect email or password."],
-  ["INVALID_PASSWORD", "Incorrect email or password."],
-  ["EMAIL_NOT_FOUND", "No account found with this email."],
-  ["INVALID_EMAIL", "Please enter a valid email address."],
-  ["WEAK_PASSWORD", "Password must be at least 6 characters."],
-  ["TOO_MANY_ATTEMPTS", "Too many attempts. Please try again in a few minutes."],
-  ["USER_DISABLED", "This account has been disabled. Please contact us."],
-  ["OPERATION_NOT_ALLOWED", "This sign-in method is not enabled yet."],
-  ["CREDENTIAL_TOO_OLD", "For security, please sign in again and retry."],
-  ["TOKEN_EXPIRED", "Your session expired. Please sign in again."],
-  ["INVALID_IDP_RESPONSE", "Google sign-in failed. Please try again."],
-];
+const asAuthError = (e: unknown) =>
+  e instanceof AuthError ? e : new AuthError(e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
 
-function friendly(code: string) {
-  const hit = FRIENDLY.find(([k]) => code.startsWith(k) || code.includes(k));
-  return hit ? hit[1] : "Something went wrong. Please try again.";
-}
+type Tokens = { access: string; refresh: string; exp: number };
+type Stored = { tokens: Tokens; user: AppUser };
+const KEY = "bsh_session_v2";
+const EARLY_MS = 60_000; // renew the token a minute before it expires
 
-async function fb<T>(endpoint: string, body: unknown): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${endpoint}?key=${FIREBASE_API_KEY}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  } catch {
-    throw new AuthError("Unable to reach the server. Please check your internet.");
-  }
-  const json = (await res.json().catch(() => ({}))) as { error?: { message?: string } } & T;
-  if (!res.ok) throw new AuthError(friendly(json.error?.message ?? ""));
-  return json;
-}
+const toUser = (u: BackendUser, fallback?: AppUser): AppUser => ({
+  uid: u.id,
+  email: u.email ?? fallback?.email ?? "",
+  name: u.full_name || u.name || fallback?.name || (u.email ?? "").split("@")[0],
+  phone: u.phone ?? fallback?.phone ?? "",
+});
 
-type TokenResp = { idToken: string; refreshToken: string; expiresIn: string; localId: string; email?: string; displayName?: string; photoUrl?: string };
-type Stored = { refreshToken: string; user: AppUser };
-const KEY = "bsh_session_v1";
+const toTokens = (r: AuthResult): Tokens => ({
+  access: r.token || r.session.access_token,
+  refresh: r.session.refresh_token,
+  exp: r.session.expires_at ? r.session.expires_at * 1000 : Date.now() + (r.session.expires_in ?? 3600) * 1000,
+});
+
+export type SignUpInput = { name: string; phone: string; email: string; password: string; confirmPassword: string };
 
 type Ctx = {
   user: AppUser | null;
   loading: boolean;
   configured: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (name: string, email: string, password: string) => Promise<void>;
-  signInWithGoogle: (googleIdToken: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  signIn: (identifier: string, password: string) => Promise<void>;
+  signUp: (input: SignUpInput) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  confirmPasswordReset: (email: string, code: string, newPassword: string) => Promise<void>;
   signOut: () => Promise<void>;
-  deleteAccount: () => Promise<void>;
-  updateDisplayProfile: (name: string, photoUrl: string) => Promise<void>;
-  requestEmailChange: (email: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<Ctx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(authEnabled);
-  const token = useRef<{ id: string; exp: number; refresh: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const tokens = useRef<Tokens | null>(null);
+  const userRef = useRef<AppUser | null>(null);
+  const inflight = useRef<Promise<string | null> | null>(null);
 
-  const freshRef = useRef<() => Promise<string>>(async () => { throw new AuthError("Please sign in again."); });
-  const apply = useCallback(async (resp: TokenResp, fallbackName = "") => {
-    const u: AppUser = { uid: resp.localId, email: resp.email ?? "", name: resp.displayName || fallbackName || (resp.email ?? "").split("@")[0], photo: resp.photoUrl };
-    token.current = { id: resp.idToken, exp: Date.now() + Number(resp.expiresIn) * 1000, refresh: resp.refreshToken };
-    await sessionStore.setItemAsync(KEY, JSON.stringify({ refreshToken: resp.refreshToken, user: u } satisfies Stored)).catch(() => {});
+  const clear = useCallback(async () => {
+    tokens.current = null;
+    userRef.current = null;
+    await sessionStore.deleteItemAsync(KEY).catch(() => {});
+    setScope(null);
+    setUser(null);
+  }, []);
+
+  const persist = useCallback(async (t: Tokens, u: AppUser) => {
+    tokens.current = t;
+    userRef.current = u;
+    await sessionStore.setItemAsync(KEY, JSON.stringify({ tokens: t, user: u } satisfies Stored)).catch(() => {});
+  }, []);
+
+  /** Sign-in / sign-up success: remember the session and switch to this account's local data. */
+  const apply = useCallback(async (r: AuthResult) => {
+    const u = toUser(r.user);
+    await persist(toTokens(r), u);
     setScope(u.uid);
-    registerCloud({ uid: u.uid, getToken: () => freshRef.current() });
     await adoptGuestEnquiries();
     setUser(u);
-  }, []);
+  }, [persist]);
 
-  const freshToken = useCallback(async (): Promise<string> => {
-    const t = token.current;
-    if (t && Date.now() < t.exp - 60_000) return t.id;
-    if (!t) throw new AuthError("Please sign in again.");
-    const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(t.refresh)}` });
-    const j = (await res.json()) as { id_token?: string; refresh_token?: string; expires_in?: string };
-    if (!res.ok || !j.id_token) throw new AuthError("Your session expired. Please sign in again.");
-    token.current = { id: j.id_token, exp: Date.now() + Number(j.expires_in ?? "3600") * 1000, refresh: j.refresh_token ?? t.refresh };
-    return j.id_token;
-  }, []);
+  /** One refresh at a time, even when several screens ask for a token together. */
+  const refresh = useCallback((): Promise<string | null> => {
+    if (inflight.current) return inflight.current;
+    const current = tokens.current;
+    if (!current) return Promise.resolve(null);
+    const run = (async () => {
+      try {
+        const r = await apiRefresh(current.refresh);
+        const u = toUser(r.user, userRef.current ?? undefined);
+        await persist(toTokens(r), u);
+        setUser((prev) => (prev && prev.name === u.name && prev.phone === u.phone && prev.email === u.email ? prev : u));
+        return tokens.current?.access ?? null;
+      } catch (e) {
+        // Refresh token rejected = signed out for good. Network trouble = keep the session and try later.
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) await clear();
+        throw e;
+      } finally {
+        inflight.current = null;
+      }
+    })();
+    inflight.current = run;
+    return run;
+  }, [clear, persist]);
 
-  useEffect(() => { freshRef.current = freshToken; }, [freshToken]);
+  const getToken = useCallback(async (): Promise<string | null> => {
+    const t = tokens.current;
+    if (!t) return null;
+    if (Date.now() < t.exp - EARLY_MS) return t.access;
+    try {
+      return await refresh();
+    } catch {
+      // offline: the old token may still be valid for a moment
+      return Date.now() < t.exp ? t.access : null;
+    }
+  }, [refresh]);
 
-  // Restore the session on launch: show the saved user at once, refresh the token in the background.
   useEffect(() => {
-    if (!authEnabled) return;
+    setTokenHooks({ getToken, onUnauthorized: () => refresh().catch(() => null) });
+    return () => setTokenHooks(null);
+  }, [getToken, refresh]);
+
+  // Restore the session on launch: show the saved user at once, renew the token in the background.
+  useEffect(() => {
     (async () => {
       try {
         const raw = await sessionStore.getItemAsync(KEY);
         if (raw) {
           const s = JSON.parse(raw) as Stored;
-          token.current = { id: "", exp: 0, refresh: s.refreshToken };
-          setScope(s.user.uid);
-          registerCloud({ uid: s.user.uid, getToken: () => freshRef.current() });
-          setUser(s.user);
-          try { await freshToken(); } catch (e) { if (e instanceof AuthError) { /* offline is fine, an expired session is not */ } }
+          if (s?.tokens?.refresh && s?.user?.uid) {
+            tokens.current = s.tokens;
+            userRef.current = s.user;
+            setScope(s.user.uid);
+            setUser(s.user);
+            if (Date.now() >= s.tokens.exp - EARLY_MS) void refresh().catch(() => {});
+          }
         }
       } catch {
-        /* ignore */
+        /* ignore a damaged session */
       } finally {
         setLoading(false);
       }
     })();
-  }, [freshToken]);
+  }, [refresh]);
 
   const value = useMemo<Ctx>(() => ({
-    user, loading, configured: authEnabled,
-    signIn: async (email, password) => { await apply(await fb<TokenResp>("signInWithPassword", { email: email.trim(), password, returnSecureToken: true })); },
-    signUp: async (name, email, password) => {
-      const r = await fb<TokenResp>("signUp", { email: email.trim(), password, returnSecureToken: true });
-      await fb("update", { idToken: r.idToken, displayName: name.trim(), returnSecureToken: false }).catch(() => {});
-      await apply({ ...r, displayName: name.trim() });
+    user, loading, configured: true,
+    signIn: async (identifier, password) => {
+      try { await apply(await apiSignIn(identifier.trim(), password)); } catch (e) { throw asAuthError(e); }
     },
-    signInWithGoogle: async (googleIdToken) => {
-      await apply(await fb<TokenResp>("signInWithIdp", { postBody: `id_token=${googleIdToken}&providerId=google.com`, requestUri: "http://localhost", returnIdpCredential: true, returnSecureToken: true }));
+    signUp: async (input) => {
+      try {
+        await apply(await apiSignUp({ ...input, name: input.name.trim(), phone: input.phone.trim(), email: input.email.trim() }));
+      } catch (e) { throw asAuthError(e); }
     },
-    resetPassword: async (email) => { await fb("sendOobCode", { requestType: "PASSWORD_RESET", email: email.trim() }); },
-    updateDisplayProfile: async (name, photoUrl) => {
-      if (!user) throw new AuthError("Please sign in to edit your profile.");
-      const currentToken = await freshToken();
-      const result = await fb<TokenResp>("update", {
-        idToken: currentToken,
-        displayName: name.trim(),
-        photoUrl: photoUrl.trim(),
-        returnSecureToken: true,
-      });
-      await apply({ ...result, localId: result.localId || user.uid, email: result.email || user.email, displayName: name.trim(), photoUrl: photoUrl.trim() || undefined });
+    requestPasswordReset: async (email) => {
+      try { await apiForgotPassword(email.trim()); } catch (e) { throw asAuthError(e); }
     },
-    requestEmailChange: async (email) => {
-      if (!user) throw new AuthError("Please sign in to change your email.");
-      const nextEmail = email.trim().toLowerCase();
-      if (!nextEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(nextEmail)) throw new AuthError("Please enter a valid email address.");
-      if (nextEmail === user.email.toLowerCase()) throw new AuthError("This is already your account email.");
-      await fb("sendOobCode", { requestType: "VERIFY_AND_CHANGE_EMAIL", idToken: await freshToken(), newEmail: nextEmail });
+    confirmPasswordReset: async (email, code, newPassword) => {
+      try { await apiResetPassword(email.trim(), code.trim(), newPassword); } catch (e) { throw asAuthError(e); }
     },
-    signOut: async () => {
-      token.current = null;
-      await sessionStore.deleteItemAsync(KEY).catch(() => {});
-      setScope(null);
-      registerCloud(null);
-      setUser(null);
+    signOut: async () => { await clear(); },
+    deleteAccount: async (password) => {
+      try { await apiDeleteAccount(password); } catch (e) { throw asAuthError(e); }
+      await clear();
     },
-    deleteAccount: async () => {
-      await fb("delete", { idToken: await freshToken() });
-      token.current = null;
-      await sessionStore.deleteItemAsync(KEY).catch(() => {});
-      setScope(null);
-      registerCloud(null);
-      setUser(null);
-    },
-  }), [user, loading, apply, freshToken]);
+  }), [user, loading, apply, clear]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -193,4 +201,13 @@ export function useAuth() {
   const c = useContext(AuthContext);
   if (!c) throw new Error("useAuth must be used inside AuthProvider");
   return c;
+}
+
+/** Same rules as the backend, so mistakes are caught before a request is sent. */
+export function validatePassword(p: string): string | null {
+  if (p.length < 8) return "Password must be at least 8 characters.";
+  if (p.length > 72) return "Password must be at most 72 characters.";
+  if (!/[A-Za-z]/.test(p)) return "Password must contain at least one letter.";
+  if (!/\d/.test(p)) return "Password must contain at least one number.";
+  return null;
 }

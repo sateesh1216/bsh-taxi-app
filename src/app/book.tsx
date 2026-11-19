@@ -16,6 +16,7 @@ import { ApiError, startPayNow, submitEnquiry } from "../lib/api";
 import { KINDS, buildPayload, buildPayNow, fareFor, formatCurrency, newDraft, rows, tourPkg, validateContact, validateTrip, whatsappMessage, type Draft, type ServiceKind } from "../lib/booking";
 import { getEnquiry, saveEnquiry } from "../lib/storage";
 import { useAuth } from "../lib/auth";
+import { REQUIRE_LOGIN } from "../lib/authConfig";
 import { useT, type Key } from "../lib/i18n";
 import { getSavedPlaces, type SavedPlaces } from "../lib/prefs";
 import { whatsappSupport } from "../lib/contact";
@@ -36,7 +37,7 @@ export default function Book() {
   const [saved, setSaved] = useState<SavedPlaces>({ home: "", office: "" });
 
   useEffect(() => { getSavedPlaces().then(setSaved); }, [user]);
-  useEffect(() => { if (user) setD((p) => ({ ...p, name: p.name || user.name, email: p.email || user.email })); }, [user]);
+  useEffect(() => { if (user) setD((p) => ({ ...p, name: p.name || user.name, email: p.email || user.email, mobile: p.mobile || (user.phone ? user.phone.replace(/^\+91/, "") : "") })); }, [user]);
   useEffect(() => {
     if (!params.rebook) return;
     let active = true;
@@ -87,15 +88,23 @@ export default function Book() {
     if (step === 1) router.back(); else setStep((s) => s - 1);
   }
 
+  /** Bookings must belong to an account when REQUIRE_LOGIN is on (see lib/authConfig.ts). */
+  const mustSignIn = REQUIRE_LOGIN && !user;
+  function askSignIn() {
+    setError(t("login_to_book"));
+    router.push("/login");
+  }
+
   async function onEnquiry() {
     const err = validateTrip(d) ?? validateContact(d);
     if (err) return setError(t(err));
+    if (mustSignIn) return askSignIn();
     setBusy("enquiry");
     try {
       const res = await submitEnquiry(buildPayload(d, account));
       const rawNum = res.enquiry?.enquiry_number ?? (res as unknown as { enquiry?: { id?: unknown } })?.enquiry?.id;
       const number = rawNum != null ? String(rawNum) : `local-${Date.now()}`;
-      await saveEnquiry({ number, title: TITLES[d.kind], rows: rows(d), fare, createdAt: new Date().toISOString(), whatsapp: whatsappMessage(d, number) });
+      await saveEnquiry({ number, id: res.enquiry?.id, status: "pending", title: TITLES[d.kind], rows: rows(d), fare, createdAt: new Date().toISOString(), whatsapp: whatsappMessage(d, number) });
       router.replace({ pathname: "/confirmed", params: { number } });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Unable to send your enquiry. Please try again.");
@@ -107,13 +116,14 @@ export default function Book() {
   async function onPay() {
     const err = validateTrip(d) ?? validateContact(d);
     if (err) return setError(t(err));
+    if (mustSignIn) return askSignIn();
     setBusy("pay");
     try {
       const res = await startPayNow(buildPayNow(d, account));
       if (!/^https?:\/\//i.test(res.redirectUrl || "")) throw new ApiError("Could not open the payment page. Please try again.");
       const rawNum = res.enquiry?.enquiry_number ?? (res as unknown as { enquiry?: { id?: unknown } })?.enquiry?.id;
       const number = rawNum != null ? String(rawNum) : `local-${Date.now()}`;
-      await saveEnquiry({ number, title: TITLES[d.kind], rows: rows(d), fare, createdAt: new Date().toISOString(), whatsapp: whatsappMessage(d, number) });
+      await saveEnquiry({ number, id: (res.enquiry as { id?: string })?.id, status: "pending", title: TITLES[d.kind], rows: rows(d), fare, createdAt: new Date().toISOString(), whatsapp: whatsappMessage(d, number) });
       await WebBrowser.openBrowserAsync(res.redirectUrl);
       router.replace({ pathname: "/payment-result", params: { ref: res.payment.merchant_txn_id, number } });
     } catch (e) {
@@ -204,6 +214,13 @@ export default function Book() {
               <Text style={s.fareLabel}>{fare !== null ? t("fare_fixed") : t("fare_label")}</Text>
               <Text style={s.fareValue}>{fare !== null ? formatCurrency(fare) : t("fare_on_call")}</Text>
             </GlassCard>
+
+            {mustSignIn && (
+              <GlassCard style={{ padding: 14, gap: 10 }}>
+                <Text style={s.tourSub}>{t("login_to_book")}</Text>
+                <Button label={t("sign_in")} variant="glass" onPress={() => router.push("/login")} />
+              </GlassCard>
+            )}
 
             <Label>{t("your_details")}</Label>
             <Field label={t("lbl_name")} value={d.name} onChangeText={(name) => set({ name })} placeholder={t("ph_name")} />

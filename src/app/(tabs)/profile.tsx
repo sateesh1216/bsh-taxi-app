@@ -5,7 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Screen } from "../../components/Screen";
 import { GlassCard } from "../../components/GlassCard";
 import { Button } from "../../components/Button";
-import { Segmented } from "../../components/Form";
+import { Field, Segmented } from "../../components/Form";
 import { LocationField } from "../../components/Search";
 import { callSupport, whatsappSupport } from "../../lib/contact";
 import { AuthError, useAuth } from "../../lib/auth";
@@ -45,6 +45,8 @@ export default function Profile() {
   const [office, setOffice] = useState("");
   const [savedMsg, setSavedMsg] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deletePw, setDeletePw] = useState("");
 
   useFocusEffect(useCallback(() => {
     let active = true;
@@ -78,10 +80,11 @@ export default function Profile() {
   }
 
   function confirmDelete() {
+    if (!deletePw) return Alert.alert("Enter your password", "We need your password to delete your account.");
     Alert.alert(t("delete_title"), t("delete_body"), [
       { text: t("cancel"), style: "cancel" },
       { text: t("delete"), style: "destructive", onPress: async () => {
-        try { await deleteAccount(); }
+        try { await deleteAccount(deletePw); }
         catch (e) { Alert.alert(e instanceof AuthError ? e.message : "Something went wrong. Please try again."); }
       } },
     ]);
@@ -105,11 +108,12 @@ export default function Profile() {
             <View style={{ flex: 1, gap: 3 }}>
               <Text style={s.name}>{user.name || "BSH Taxi customer"}</Text>
               <Text style={s.mail}>{user.email}</Text>
+              {user.phone ? <Text style={s.mail}>{user.phone}</Text> : null}
               <View style={s.memberTag}><Ionicons name="shield-checkmark" size={12} color="#1570EF" /><Text style={s.memberText}>Signed in</Text></View>
             </View>
           </View>
           <View style={s.accountDivider} />
-          <Text style={s.accountHint}>Your saved bookings and addresses can be synced with this account on supported services.</Text>
+          <Text style={s.accountHint}>Your bookings are saved in this account. Sign in on any phone to see them, track your trip and pay online.</Text>
           <Button label={t("sign_out")} variant="outline" onPress={confirmSignOut} />
         </GlassCard>
       ) : (
@@ -214,7 +218,15 @@ export default function Profile() {
         <View style={s.dangerArea}>
           <Text style={s.dangerTitle}>{t("account_management")}</Text>
           <Text style={s.helper}>You can sign out from this device or request permanent account deletion.</Text>
-          <Button label={t("delete_account")} variant="outline" onPress={confirmDelete} />
+          {deleting ? (
+            <>
+              <Field label={t("lbl_password")} value={deletePw} onChangeText={setDeletePw} placeholder="••••••••" autoCapitalize="none" secure />
+              <Button label={t("delete")} variant="outline" onPress={confirmDelete} />
+              <Button label={t("cancel")} variant="glass" onPress={() => { setDeleting(false); setDeletePw(""); }} />
+            </>
+          ) : (
+            <Button label={t("delete_account")} variant="outline" onPress={() => setDeleting(true)} />
+          )}
         </View>
       ) : null}
 

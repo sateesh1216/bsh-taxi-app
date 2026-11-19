@@ -2,6 +2,12 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const en = {
+  lbl_identifier: "Email or mobile number", lbl_confirm_pw: "Confirm password", lbl_reset_code: "6-digit code", lbl_new_pw: "New password",
+  send_code: "Send reset code", reset_pw: "Reset password", back_to_signin: "Back to sign in",
+  code_sent: "We sent a 6-digit code to your email. It is valid for 10 minutes.", pw_reset_done: "Password changed. Please sign in.",
+  pw_rules: "At least 8 characters, with a letter and a number.", pw_mismatch: "Passwords do not match.",
+  login_to_book: "Sign in to confirm your booking. It will be saved in your account so you can track it and pay online.",
+  need_identifier: "Enter your email or mobile number.", need_email: "Enter a valid email address.", need_code: "Enter the 6-digit code from your email.",
   tab_home: "Home", tab_bookings: "Bookings", tab_explore: "Explore", tab_profile: "Profile",
   home_eyebrow: "VISAKHAPATNAM", home_title: "Where are we\ngoing today?", open247: "Open 24/7",
   svc_local: "Local", svc_outstation: "Outstation", svc_airport: "Airport", svc_tours: "Tours",
@@ -27,7 +33,7 @@ const en = {
   login_title: "Welcome", login_sub: "Sign in to book faster and keep your trips and saved places.",
   sign_in: "Sign in", create_account: "Create account", lbl_password: "Password", lbl_fullname: "Full name",
   forgot_pw: "Forgot password?", continue_google: "Continue with Google", continue_guest: "Continue as guest",
-  not_configured: "Accounts will be available soon. You can book as a guest now.", reset_sent: "Password reset link sent to your email.",
+  not_configured: "Accounts will be available soon. You can book as a guest now.", reset_sent: "Password reset code sent to your email.",
   enter_email: "Enter your email first.", need_fields: "Enter your email and password.", need_name: "Enter your name.",
   profile_title: "Profile", sign_out: "Sign out", delete_account: "Delete account", delete_title: "Delete your account?",
   delete_body: "Your account will be deleted permanently. This cannot be undone.", cancel: "Cancel", delete: "Delete",
@@ -84,6 +90,12 @@ const en = {
 type Key = keyof typeof en;
 
 const te: Record<Key, string> = {
+  lbl_identifier: "ఈమెయిల్ లేదా మొబైల్ నంబర్", lbl_confirm_pw: "పాస్‌వర్డ్ నిర్ధారించండి", lbl_reset_code: "6 అంకెల కోడ్", lbl_new_pw: "కొత్త పాస్‌వర్డ్",
+  send_code: "రీసెట్ కోడ్ పంపండి", reset_pw: "పాస్‌వర్డ్ రీసెట్ చేయండి", back_to_signin: "సైన్ ఇన్‌కు తిరిగి వెళ్ళండి",
+  code_sent: "మీ ఈమెయిల్‌కు 6 అంకెల కోడ్ పంపాం. ఇది 10 నిమిషాలు చెల్లుతుంది.", pw_reset_done: "పాస్‌వర్డ్ మార్చబడింది. దయచేసి సైన్ ఇన్ చేయండి.",
+  pw_rules: "కనీసం 8 అక్షరాలు, ఒక అక్షరం మరియు ఒక అంకె ఉండాలి.", pw_mismatch: "పాస్‌వర్డ్‌లు సరిపోలలేదు.",
+  login_to_book: "బుకింగ్ నిర్ధారించడానికి సైన్ ఇన్ చేయండి. ఇది మీ ఖాతాలో సేవ్ అవుతుంది, ట్రాక్ చేయవచ్చు, ఆన్‌లైన్‌లో చెల్లించవచ్చు.",
+  need_identifier: "ఈమెయిల్ లేదా మొబైల్ నంబర్ ఇవ్వండి.", need_email: "సరైన ఈమెయిల్ ఇవ్వండి.", need_code: "ఈమెయిల్‌లోని 6 అంకెల కోడ్ ఇవ్వండి.",
   tab_home: "హోమ్", tab_bookings: "బుకింగ్స్", tab_explore: "అన్వేషించండి", tab_profile: "ప్రొఫైల్",
   home_eyebrow: "విశాఖపట్నం", home_title: "ఈ రోజు ఎక్కడికి\nవెళ్దాం?", open247: "24/7 అందుబాటులో",
   svc_local: "లోకల్", svc_outstation: "ఔట్‌స్టేషన్", svc_airport: "ఎయిర్‌పోర్ట్", svc_tours: "టూర్స్",
@@ -164,6 +176,21 @@ const te: Record<Key, string> = {
 };
 
 const hi: Partial<Record<keyof typeof en, string>> = {
+  lbl_identifier: 'ईमेल या मोबाइल नंबर',
+  lbl_confirm_pw: 'पासवर्ड की पुष्टि करें',
+  lbl_reset_code: '6 अंकों का कोड',
+  lbl_new_pw: 'नया पासवर्ड',
+  send_code: 'रीसेट कोड भेजें',
+  reset_pw: 'पासवर्ड रीसेट करें',
+  back_to_signin: 'साइन इन पर वापस जाएँ',
+  code_sent: 'हमने आपके ईमेल पर 6 अंकों का कोड भेजा है। यह 10 मिनट तक मान्य है।',
+  pw_reset_done: 'पासवर्ड बदल गया। कृपया साइन इन करें।',
+  pw_rules: 'कम से कम 8 अक्षर, एक अक्षर और एक अंक के साथ।',
+  pw_mismatch: 'पासवर्ड मेल नहीं खाते।',
+  login_to_book: 'बुकिंग पक्की करने के लिए साइन इन करें। यह आपके खाते में सहेजी जाएगी, ट्रैक और ऑनलाइन भुगतान कर सकेंगे।',
+  need_identifier: 'ईमेल या मोबाइल नंबर दर्ज करें।',
+  need_email: 'सही ईमेल दर्ज करें।',
+  need_code: 'ईमेल में आया 6 अंकों का कोड दर्ज करें।',
   tab_home: "होम",
   tab_bookings: "बुकिंग्स",
   tab_explore: "एक्सप्लोर",

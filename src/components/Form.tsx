@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image, Platform, Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { GlassCard } from "./GlassCard";
@@ -12,22 +13,30 @@ export function Label({ children }: { children: string }) {
 type FieldProps = { label: string; value: string; onChangeText: (t: string) => void; placeholder?: string; keyboardType?: KeyboardTypeOptions; autoCapitalize?: "none" | "words" | "sentences"; secure?: boolean };
 
 export function Field({ label, value, onChangeText, placeholder, keyboardType, autoCapitalize = "words", secure }: FieldProps) {
+  const [hidden, setHidden] = useState(true);
   return (
     <View style={{ gap: 6 }}>
       <Label>{label}</Label>
       <GlassCard r={14}>
-        <TextInput
-          accessibilityLabel={label}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor="#98A2B3"
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          secureTextEntry={secure}
-          autoCorrect={!secure}
-          style={s.input}
-        />
+        <View style={secure ? { flexDirection: "row", alignItems: "center" } : undefined}>
+          <TextInput
+            accessibilityLabel={label}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor="#98A2B3"
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
+            secureTextEntry={secure && hidden}
+            autoCorrect={!secure}
+            style={[s.input, secure ? { flex: 1 } : null]}
+          />
+          {secure ? (
+            <Pressable accessibilityRole="button" accessibilityLabel={hidden ? "Show password" : "Hide password"} onPress={() => setHidden((h) => !h)} hitSlop={8} style={{ paddingHorizontal: 14 }}>
+              <Ionicons name={hidden ? "eye-outline" : "eye-off-outline"} size={20} color="#667085" />
+            </Pressable>
+          ) : null}
+        </View>
       </GlassCard>
     </View>
   );

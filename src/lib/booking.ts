@@ -115,6 +115,13 @@ export function buildPayNow(d: Draft, account?: Account): PayNowPayload {
   return { ...buildPayload(d, account), planA: d.kind === "tour" ? d.tourId : d.localPkg, vehicle_key: d.carId };
 }
 
+/** WhatsApp text for a booking that already exists (built from saved rows). */
+export function whatsappMessageFromRows(title: string, rows: { label: string; value: string }[], enquiryNumber?: string): string {
+  const lines = ["Hi BSH Taxi Services! I need help with my booking.", "", `*${title}*`, ...rows.map((r) => `${r.label}: ${r.value}`)];
+  if (enquiryNumber) lines.push("", `Enquiry no: ${enquiryNumber}`);
+  return lines.join("\n");
+}
+
 export function whatsappMessage(d: Draft, enquiryNumber?: string): string {
   const fare = fareFor(d);
   const lines = ["Hi BSH Taxi Services! I'd like to book a cab.", "", `*${SERVICE_TYPE[d.kind]}*`, ...rows(d).map((r) => `${r.label}: ${r.value}`)];
