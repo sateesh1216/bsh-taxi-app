@@ -25,3 +25,12 @@ Accounts, bookings and payments all use the BSH backend, see `BACKEND_INTEGRATIO
 - `src/data`        booking config, fixed prices, fleet (copied from the website)
 
 Progress and plan: see `MIGRATION_PROGRESS.md`.
+
+
+## Latest UI fixes (Nov 2026)
+- Popular outstation route cards display fixed fares when available and a visible **Book Now** action.
+- Fixed-price route vehicle cards on the outstation detail page include a vehicle-specific Book Now action that preselects the matching vehicle in the booking flow.
+- Pickup search includes **Use my current location** with permission handling and reverse-geocoded address; manual search remains available.
+- Offers popup stays disabled when `ACTIVE_OFFERS` is empty and is only shown when a valid active offer is configured.
+
+Install/update dependencies with `npm install` after this update (the new location feature uses `expo-location`), then rebuild the native app to include location permissions.

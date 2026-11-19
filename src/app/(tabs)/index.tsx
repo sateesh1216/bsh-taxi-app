@@ -9,7 +9,8 @@ import { GlassCard } from "../../components/GlassCard";
 import { Button } from "../../components/Button";
 import { ImageCard } from "../../components/Content";
 import { callSupport, whatsappSupport } from "../../lib/contact";
-import { destinations, outstations, services, popularPickup } from "../../data/site";
+import { destinations, outstations, services, popularPickup, vehicleOptions } from "../../data/site";
+import { getOutstationPricing } from "../../lib/outstation";
 import { useAuth } from "../../lib/auth";
 import { useT, type Key } from "../../lib/i18n";
 import { getSavedPlaces, type SavedPlaces } from "../../lib/prefs";
@@ -127,17 +128,23 @@ export default function Home() {
 
       <View style={s.sectionHead}><View><Text style={s.h2}>Popular outstation routes</Text><Text style={s.sectionHint}>Start your next trip from Vizag</Text></View><Pressable accessibilityRole="button" onPress={() => router.push("/outstation")}><Text style={s.more}>View all</Text></Pressable></View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.horizontal}>
-        {outstations.slice(0, 6).map((route) => (
-          <Pressable key={route.slug} accessibilityRole="button" onPress={() => router.push(`/book?type=outstation&drop=${encodeURIComponent(route.name.replace(/^Vizag to /i, ""))}`)} style={{ width: 218 }}>
+        {outstations.slice(0, 6).map((route) => {
+          const fixed = vehicleOptions.map((v) => ({ vehicle: v, pricing: getOutstationPricing(route.slug, v.slug) })).filter((x) => x.pricing.mode === "fixed" && x.pricing.price > 0).sort((a, b) => (a.pricing.mode === "fixed" ? a.pricing.price : 0) - (b.pricing.mode === "fixed" ? b.pricing.price : 0));
+          const cheapest = fixed[0];
+          const drop = route.name.replace(/^Vizag to /i, "");
+          const book = () => router.push(`/book?type=outstation&drop=${encodeURIComponent(drop)}${cheapest ? `&car=${encodeURIComponent(cheapest.vehicle.slug === "swift-dzire" ? "sedan" : cheapest.vehicle.slug === "ertiga" ? "suv" : cheapest.vehicle.slug === "innova-crysta" ? "innova_crysta" : "tempo_traveller")}` : ""}`);
+          return (
+          <View key={route.slug} style={{ width: 218 }}>
             <GlassCard r={18} style={s.routeCard}>
               <View style={s.routeIcon}><Ionicons name="navigate" size={20} color={colors.navy} /></View>
               <Text style={s.routeName}>{route.name}</Text>
               <Text style={s.routeMeta}>{route.distanceKm ? `${route.distanceKm} km` : "Outstation trip"}{route.driveTime ? ` · ${route.driveTime}` : ""}</Text>
-              {route.costPerDay ? <Text style={s.routePrice}>From ₹{route.costPerDay.toLocaleString("en-IN")}<Text style={s.routeUnit}> / day</Text></Text> : null}
-              <View style={s.routeBook}><Text style={s.routeBookText}>Book this route</Text><Ionicons name="arrow-forward" size={15} color={colors.amber} /></View>
+              {cheapest ? <Text style={s.routePrice}>Fixed fare from ₹{cheapest.pricing.mode === "fixed" ? cheapest.pricing.price.toLocaleString("en-IN") : ""}<Text style={s.routeUnit}> · {cheapest.vehicle.name}</Text></Text> : route.costPerDay ? <Text style={s.routePrice}>From ₹{route.costPerDay.toLocaleString("en-IN")}<Text style={s.routeUnit}> / day</Text></Text> : <Text style={s.routeUnit}>Fare on request</Text>}
+              <Pressable accessibilityRole="button" onPress={book} style={s.routeBook}><Text style={s.routeBookText}>Book Now</Text><Ionicons name="arrow-forward" size={15} color={colors.amber} /></Pressable>
             </GlassCard>
-          </Pressable>
-        ))}
+          </View>
+          );
+        })}
       </ScrollView>
 
       <View style={s.sectionHead}><View><Text style={s.h2}>Our services</Text><Text style={s.sectionHint}>Travel options for every occasion</Text></View><Pressable accessibilityRole="button" onPress={() => router.push("/services")}><Text style={s.more}>View all</Text></Pressable></View>

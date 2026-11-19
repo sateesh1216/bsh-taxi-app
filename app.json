@@ -29,7 +29,13 @@
       "expo-web-browser",
       "expo-splash-screen",
       "@react-native-community/datetimepicker",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow BSH Taxi Services to use your location to set pickup address."
+        }
+      ]
     ],
     "scheme": "bshtaxi",
     "backgroundColor": "#060F24"

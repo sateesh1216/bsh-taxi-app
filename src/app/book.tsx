@@ -28,9 +28,10 @@ const TITLES: Record<ServiceKind, string> = { local: "Local Taxi", outstation: "
 export default function Book() {
   const { t } = useT();
   const { user } = useAuth();
-  const params = useLocalSearchParams<{ type?: string; drop?: string; pickup?: string; rebook?: string }>();
+  const params = useLocalSearchParams<{ type?: string; drop?: string; pickup?: string; car?: string; rebook?: string }>();
   const initial = KINDS.find((k) => k === params.type) ?? "local";
-  const [d, setD] = useState<Draft>(() => { const x = newDraft(initial, params.drop ?? ""); return params.pickup ? { ...x, pickup: params.pickup } : x; });
+  const initialCarId = params.car ? CAR_TYPES.find((c) => c.id === params.car || c.name.toLowerCase().includes(String(params.car).toLowerCase()))?.id : undefined;
+  const [d, setD] = useState<Draft>(() => { const x = newDraft(initial, params.drop ?? ""); return { ...x, ...(params.pickup ? { pickup: params.pickup } : {}), ...(initialCarId ? { carId: initialCarId } : {}) }; });
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState<"enquiry" | "pay" | null>(null);
   const [error, setError] = useState<string | null>(null);

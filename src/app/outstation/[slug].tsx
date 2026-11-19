@@ -51,6 +51,10 @@ export default function OutstationDetail() {
                 {p.mode === "perKm" && o.distanceKm ? <Text style={s.vSub}>Estimate: {formatCurrency(calculateOutstationFare(o.distanceKm, v))} for the round trip</Text> : null}
                 <Text style={s.vSub}>Base {v.basePackageKm} km: {formatCurrency(v.basePackagePrice)} · Extra {formatCurrency(v.extraKmRate)}/km · {formatCurrency(v.extraHourRate)}/hr</Text>
                 <Text style={s.best}>{v.bestFor}</Text>
+                <Button label={p.mode === "fixed" ? `Book Now · ${formatCurrency(p.price)}` : "Book Now"} onPress={() => {
+                  const car = v.slug === "swift-dzire" ? "sedan" : v.slug === "ertiga" ? "suv" : v.slug === "innova-crysta" ? "innova_crysta" : "tempo_traveller";
+                  router.push(`/book?type=outstation&drop=${encodeURIComponent(place)}&car=${car}`);
+                }} />
               </GlassCard>
             );
           })}

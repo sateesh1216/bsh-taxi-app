@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import * as Location from "expo-location";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -58,6 +59,8 @@ export function LocationField({ label, value, onChangeText, placeholder, popular
   const [items, setItems] = useState<PlaceSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [locBusy, setLocBusy] = useState(false);
+  const [locError, setLocError] = useState("");
   const skip = useRef(false);
   const reqId = useRef(0);
 
@@ -96,6 +99,23 @@ export function LocationField({ label, value, onChangeText, placeholder, popular
       <GlassCard r={14}>
         <TextInput accessibilityLabel={label} value={value} onChangeText={(t) => { onChangeText(t); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 200)} placeholder={placeholder} placeholderTextColor="#98A2B3" style={s.field} autoCapitalize="words" />
       </GlassCard>
+      <Pressable accessibilityRole="button" disabled={locBusy} onPress={async () => {
+        setLocError(""); setLocBusy(true);
+        try {
+          const permission = await Location.requestForegroundPermissionsAsync();
+          if (permission.status !== "granted") { setLocError("Location permission denied. Please search or enter pickup manually."); return; }
+          const current = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          const places = await Location.reverseGeocodeAsync({ latitude: current.coords.latitude, longitude: current.coords.longitude });
+          const p = places[0];
+          const labelText = p ? [p.name, p.street, p.district, p.city, p.region].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", ") : `${current.coords.latitude.toFixed(5)}, ${current.coords.longitude.toFixed(5)}`;
+          skip.current = true; onChangeText(labelText); setOpen(false);
+        } catch { setLocError("Could not get current location. Please enter pickup manually."); }
+        finally { setLocBusy(false); }
+      }} style={s.currentLocation}>
+        <Ionicons name={locBusy ? "hourglass-outline" : "locate"} size={17} color={colors.primary} />
+        <Text style={s.currentLocationText}>{locBusy ? "Getting current location…" : "Use my current location"}</Text>
+      </Pressable>
+      {locError ? <Text style={s.locationError}>{locError}</Text> : null}
       {open && (
         <GlassCard r={14} strong>
           {loading && <ActivityIndicator color={colors.amber} style={{ padding: 12 }} />}
@@ -124,4 +144,7 @@ const s = StyleSheet.create({
   title: { fontFamily: fonts.semibold, fontSize: 15, color: colors.white },
   sub: { marginTop: 2, fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
   empty: { padding: 14, fontFamily: fonts.body, fontSize: 13, color: colors.textMuted },
+  currentLocation: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8, paddingHorizontal: 4 },
+  currentLocationText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.primary },
+  locationError: { fontFamily: fonts.body, fontSize: 12, color: "#B42318" },
 });
