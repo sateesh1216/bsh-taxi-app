@@ -74,7 +74,7 @@ export default function Home() {
           <Text style={s.heroSub}>{t("home_hero_sub")}</Text>
           <Pressable accessibilityRole="button" onPress={() => router.push("/book?type=local")} style={s.searchAction}>
             <View style={s.searchIcon}><Ionicons name="search" size={20} color="#FFFFFF" /></View>
-            <View style={{ flex: 1 }}><Text style={s.searchTitle}>{t("book_home")}</Text><Text style={s.searchSub}>{t("book_home_hint")}</Text></View>
+            <View style={{ flex: 1 }}><Text style={s.searchTitle}>Start your booking</Text><Text style={s.searchSub}>Pickup → Destination → Choose car → Confirm</Text></View>
             <Ionicons name="arrow-forward-circle" size={29} color={colors.amber} />
           </Pressable>
           <View style={s.trustLine}>
@@ -85,9 +85,22 @@ export default function Home() {
       </View>
 
       <View style={s.homeBooking}>
-        <View style={s.homeBookingHead}><View style={{ flex: 1 }}><Text style={s.h2}>{t("book_home")}</Text><Text style={s.sectionHint}>{t("everyday_rides")}</Text></View><View style={s.homeBookingIcon}><Ionicons name="home" size={20} color="#155EEF" /></View></View>
+        <View style={s.homeBookingHead}>
+          <View style={{ flex: 1 }}>
+            <Text style={s.h2}>Book in 30 seconds</Text>
+            <Text style={s.sectionHint}>A few taps. Clear fare. Confirm your ride.</Text>
+          </View>
+          <View style={s.homeBookingIcon}><Ionicons name="flash" size={20} color="#155EEF" /></View>
+        </View>
+        <View style={s.stepsMini}>
+          <View style={s.stepMini}><View style={s.stepMiniNum}><Text style={s.stepMiniNumText}>1</Text></View><Text style={s.stepMiniText}>Pickup</Text></View>
+          <View style={s.stepMiniLine} />
+          <View style={s.stepMini}><View style={s.stepMiniNum}><Text style={s.stepMiniNumText}>2</Text></View><Text style={s.stepMiniText}>Destination</Text></View>
+          <View style={s.stepMiniLine} />
+          <View style={s.stepMini}><View style={s.stepMiniNum}><Text style={s.stepMiniNumText}>3</Text></View><Text style={s.stepMiniText}>Book</Text></View>
+        </View>
         <View style={s.homeBookingActions}>
-          <Pressable accessibilityRole="button" onPress={() => router.push("/book?type=local")} style={s.homeAction}><Ionicons name="car-outline" size={19} color="#155EEF" /><Text style={s.homeActionText}>{t("city_ride")}</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.push("/book?type=local")} style={s.homeAction}><Ionicons name="car-outline" size={19} color="#155EEF" /><Text style={s.homeActionText}>City ride</Text></Pressable>
           <Pressable accessibilityRole="button" onPress={() => router.push("/book?type=airport")} style={s.homeAction}><Ionicons name="airplane-outline" size={19} color="#155EEF" /><Text style={s.homeActionText}>Airport</Text></Pressable>
           <Pressable accessibilityRole="button" onPress={() => router.push("/book?type=outstation")} style={s.homeAction}><Ionicons name="navigate-outline" size={19} color="#155EEF" /><Text style={s.homeActionText}>Outstation</Text></Pressable>
         </View>
@@ -134,15 +147,15 @@ export default function Home() {
           const drop = route.name.replace(/^Vizag to /i, "");
           const book = () => router.push(`/book?type=outstation&drop=${encodeURIComponent(drop)}${cheapest ? `&car=${encodeURIComponent(cheapest.vehicle.slug === "swift-dzire" ? "sedan" : cheapest.vehicle.slug === "ertiga" ? "suv" : cheapest.vehicle.slug === "innova-crysta" ? "innova_crysta" : "tempo_traveller")}` : ""}`);
           return (
-          <View key={route.slug} style={{ width: 218 }}>
-            <GlassCard r={18} style={s.routeCard}>
-              <View style={s.routeIcon}><Ionicons name="navigate" size={20} color={colors.navy} /></View>
-              <Text style={s.routeName}>{route.name}</Text>
-              <Text style={s.routeMeta}>{route.distanceKm ? `${route.distanceKm} km` : "Outstation trip"}{route.driveTime ? ` · ${route.driveTime}` : ""}</Text>
-              {cheapest ? <Text style={s.routePrice}>Fixed fare from ₹{cheapest.pricing.mode === "fixed" ? cheapest.pricing.price.toLocaleString("en-IN") : ""}<Text style={s.routeUnit}> · {cheapest.vehicle.name}</Text></Text> : route.costPerDay ? <Text style={s.routePrice}>From ₹{route.costPerDay.toLocaleString("en-IN")}<Text style={s.routeUnit}> / day</Text></Text> : <Text style={s.routeUnit}>Fare on request</Text>}
-              <Pressable accessibilityRole="button" onPress={book} style={s.routeBook}><Text style={s.routeBookText}>Book Now</Text><Ionicons name="arrow-forward" size={15} color={colors.amber} /></Pressable>
-            </GlassCard>
-          </View>
+            <View key={route.slug} style={{ width: 218 }}>
+              <GlassCard r={18} style={s.routeCard}>
+                <View style={s.routeIcon}><Ionicons name="navigate" size={20} color={colors.navy} /></View>
+                <Text style={s.routeName}>{route.name}</Text>
+                <Text style={s.routeMeta}>{route.distanceKm ? `${route.distanceKm} km` : "Outstation trip"}{route.driveTime ? ` · ${route.driveTime}` : ""}</Text>
+                {cheapest ? <Text style={s.routePrice}>Fixed fare from ₹{cheapest.pricing.mode === "fixed" ? cheapest.pricing.price.toLocaleString("en-IN") : ""}<Text style={s.routeUnit}> · {cheapest.vehicle.name}</Text></Text> : route.costPerDay ? <Text style={s.routePrice}>From ₹{route.costPerDay.toLocaleString("en-IN")}<Text style={s.routeUnit}> / day</Text></Text> : <Text style={s.routeUnit}>Fare on request</Text>}
+                <Pressable accessibilityRole="button" onPress={book} style={s.routeBook}><Text style={s.routeBookText}>Book Now</Text><Ionicons name="arrow-forward" size={15} color={colors.amber} /></Pressable>
+              </GlassCard>
+            </View>
           );
         })}
       </ScrollView>
@@ -162,31 +175,31 @@ export default function Home() {
         <View style={s.helpActions}><Button label="Call us" onPress={callSupport} style={{ flex: 1 }} /><Button label="WhatsApp" variant="outline" onPress={() => whatsappSupport()} style={{ flex: 1 }} /></View>
       </GlassCard>
       <Button label="Explore all services and routes" variant="glass" onPress={() => router.push("/explore")} style={{ marginTop: 14 }} />
-          <Modal visible={!!offerPopup} transparent animationType="fade" onRequestClose={() => {
-        if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+      <Modal visible={!!offerPopup} transparent animationType="fade" onRequestClose={() => {
+        if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => { });
         setOfferPopup(null);
       }}>
         <View style={s.offerOverlay}>
           <View style={s.offerModal}>
             <Pressable style={s.offerClose} onPress={() => {
-              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => { });
               setOfferPopup(null);
             }}><Ionicons name="close" size={22} color={colors.text} /></Pressable>
             <Ionicons name="gift-outline" size={36} color={colors.primary} />
             <Text style={s.offerTitle}>{offerPopup?.title}</Text>
             <Text style={s.offerMessage}>{offerPopup?.message}</Text>
             <Button label={offerPopup?.actionLabel || "View offers"} onPress={() => {
-              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => { });
               setOfferPopup(null); router.push("/offers");
             }} />
             <Pressable onPress={() => {
-              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => {});
+              if (offerPopup) AsyncStorage.setItem(`bsh_offer_dismissed_${offerPopup.id}`, "1").catch(() => { });
               setOfferPopup(null);
             }}><Text style={s.offerDismiss}>Not now</Text></Pressable>
           </View>
         </View>
       </Modal>
-</Screen>
+    </Screen>
   );
 }
 
@@ -213,6 +226,12 @@ const s = StyleSheet.create({
   homeBooking: { padding: 16, borderRadius: 20, borderWidth: 1, borderColor: "#E4E7EC", backgroundColor: "#FFFFFF", marginBottom: 22, gap: 13 },
   homeBookingHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   homeBookingIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center" },
+  stepsMini: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 4, paddingVertical: 2 },
+  stepMini: { alignItems: "center", gap: 5 },
+  stepMiniNum: { width: 25, height: 25, borderRadius: 13, backgroundColor: "#EFF5FF", borderWidth: 1, borderColor: "#D0DDF5", alignItems: "center", justifyContent: "center" },
+  stepMiniNumText: { fontFamily: fonts.bold, fontSize: 12, color: "#155EEF" },
+  stepMiniText: { fontFamily: fonts.semibold, fontSize: 10, color: "#667085" },
+  stepMiniLine: { height: 1, flex: 1, marginHorizontal: 8, backgroundColor: "#D0DDF5", marginBottom: 17 },
   homeBookingActions: { flexDirection: "row", gap: 8 },
   homeAction: { flex: 1, minHeight: 58, borderRadius: 14, backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#EAECF0", alignItems: "center", justifyContent: "center", gap: 5 },
   homeActionText: { fontFamily: fonts.semibold, fontSize: 12, color: "#344054" },
