@@ -1,10 +1,12 @@
 import { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Fraunces_700Bold } from "@expo-google-fonts/fraunces";
 import { PublicSans_400Regular, PublicSans_600SemiBold, PublicSans_700Bold } from "@expo-google-fonts/public-sans";
+import { FloatingCallButton } from "../components/FloatingCallButton";
 import { colors } from "../theme/colors";
 import { AuthProvider } from "../lib/auth";
 import { LangProvider } from "../lib/i18n";
@@ -24,8 +26,15 @@ export default function RootLayout() {
     <LangProvider>
       <AuthProvider>
         <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.navy } }} />
+        <View style={styles.appRoot}>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.navy } }} />
+          <FloatingCallButton />
+        </View>
       </AuthProvider>
     </LangProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  appRoot: { flex: 1 },
+});
