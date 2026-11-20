@@ -18,11 +18,11 @@ export function SearchBox() {
   const hits = searchSite(q);
   return (
     <View style={{ gap: 8 }}>
-      <GlassCard r={16} style={s.inputRow}>
+      <View style={s.inputRow}>
         <Ionicons name="search" size={20} color={colors.textMuted} />
         <TextInput accessibilityLabel="Search places, routes and services" value={q} onChangeText={setQ} placeholder={t("search_ph")} placeholderTextColor="#98A2B3" style={s.input} autoCapitalize="none" returnKeyType="search" />
         {q ? <Pressable accessibilityLabel="Clear search" onPress={() => setQ("")} hitSlop={10}><Ionicons name="close-circle" size={20} color={colors.textMuted} /></Pressable> : null}
-      </GlassCard>
+      </View>
       {q.trim() ? (
         <GlassCard r={16}>
           {hits.length === 0 ? <Text style={s.empty}>No match. Try another name, or call us.</Text> : hits.map((h, i) => (
@@ -31,7 +31,7 @@ export function SearchBox() {
                 <Text style={s.title}>{h.title}</Text>
                 <Text style={s.sub}>{h.subtitle}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.amber} />
+              <Ionicons name="chevron-forward" size={18} color={colors.faint} />
             </Pressable>
           ))}
         </GlassCard>
@@ -51,10 +51,10 @@ function toSuggestion(f: PhotonFeature): PlaceSuggestion {
   return { primary, secondary, fullLabel: [primary, secondary].filter(Boolean).join(", "), lat: String(f.geometry.coordinates[1]), lon: String(f.geometry.coordinates[0]) };
 }
 
-type LocProps = { label: string; value: string; onChangeText: (t: string) => void; placeholder?: string; popular: PlaceSuggestion[]; limitToVizag?: boolean };
+type LocProps = { label: string; value: string; onChangeText: (t: string) => void; placeholder?: string; popular: PlaceSuggestion[]; limitToVizag?: boolean; marker?: "pickup" | "drop" };
 
 /** Address box: suggestions (live search + popular places) open directly below it. */
-export function LocationField({ label, value, onChangeText, placeholder, popular, limitToVizag }: LocProps) {
+export function LocationField({ label, value, onChangeText, placeholder, popular, limitToVizag, marker }: LocProps) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<PlaceSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -96,9 +96,11 @@ export function LocationField({ label, value, onChangeText, placeholder, popular
   return (
     <View style={{ gap: 6 }}>
       <Label>{label}</Label>
-      <GlassCard r={14}>
-        <TextInput accessibilityLabel={label} value={value} onChangeText={(t) => { onChangeText(t); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 200)} placeholder={placeholder} placeholderTextColor="#98A2B3" style={s.field} autoCapitalize="words" />
-      </GlassCard>
+      <View style={[s.box, open && { borderColor: colors.blue }]}>
+        {marker ? <View style={marker === "pickup" ? s.dotPickup : s.dotDrop} /> : null}
+        <TextInput accessibilityLabel={label || placeholder} value={value} onChangeText={(t) => { onChangeText(t); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 200)} placeholder={placeholder} placeholderTextColor="#98A2B3" style={s.field} autoCapitalize="words" />
+        {value ? <Pressable accessibilityRole="button" accessibilityLabel="Clear" hitSlop={10} onPress={() => { onChangeText(""); setOpen(true); }} style={{ paddingRight: 14 }}><Ionicons name="close-circle" size={18} color={colors.faint} /></Pressable> : null}
+      </View>
       <Pressable accessibilityRole="button" disabled={locBusy} onPress={async () => {
         setLocError(""); setLocBusy(true);
         try {
@@ -117,12 +119,12 @@ export function LocationField({ label, value, onChangeText, placeholder, popular
       </Pressable>
       {locError ? <Text style={s.locationError}>{locError}</Text> : null}
       {open && (
-        <GlassCard r={14} strong>
-          {loading && <ActivityIndicator color={colors.amber} style={{ padding: 12 }} />}
+        <GlassCard r={16}>
+          {loading && <ActivityIndicator color={colors.blue} style={{ padding: 12 }} />}
           {!loading && list.length === 0 && <Text style={s.empty}>{failed ? "Search is unavailable. You can type the address." : "No places found. You can type the full address."}</Text>}
           {list.map((p, i) => (
             <Pressable key={`${p.fullLabel}-${i}`} accessibilityRole="button" onPress={() => pick(p)} style={[s.row, i > 0 && s.rowLine]}>
-              <Ionicons name="location" size={18} color={colors.amber} />
+              <View style={s.pinWrap}><Ionicons name="location" size={16} color={colors.blue} /></View>
               <View style={{ flex: 1 }}>
                 <Text style={s.title}>{p.primary}</Text>
                 {p.secondary ? <Text style={s.sub} numberOfLines={1}>{p.secondary}</Text> : null}
@@ -136,15 +138,19 @@ export function LocationField({ label, value, onChangeText, placeholder, popular
 }
 
 const s = StyleSheet.create({
-  inputRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, minHeight: 52 },
-  input: { flex: 1, minHeight: 48, fontFamily: fonts.body, fontSize: 15, color: colors.white },
-  field: { minHeight: 52, paddingHorizontal: 14, fontFamily: fonts.body, fontSize: 15, color: colors.white },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 56 },
+  inputRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, minHeight: 54, backgroundColor: colors.card, borderRadius: 18, borderWidth: 1.5, borderColor: colors.line },
+  input: { flex: 1, minHeight: 48, fontFamily: fonts.body, fontSize: 15, color: colors.heading },
+  box: { flexDirection: "row", alignItems: "center", backgroundColor: colors.card, borderRadius: 16, borderWidth: 1.5, borderColor: colors.line, paddingLeft: 14 },
+  dotPickup: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.blue, borderWidth: 3, borderColor: "#BFD4FF", marginRight: 2 },
+  dotDrop: { width: 12, height: 12, borderRadius: 3, backgroundColor: colors.taxi, borderWidth: 3, borderColor: "#FFE2A0", marginRight: 2 },
+  field: { flex: 1, minHeight: 54, paddingHorizontal: 12, fontFamily: fonts.body, fontSize: 15, color: colors.heading },
+  pinWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#EAF1FF", alignItems: "center", justifyContent: "center" },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 58 },
   rowLine: { borderTopWidth: 1, borderTopColor: colors.divider },
-  title: { fontFamily: fonts.semibold, fontSize: 15, color: colors.white },
+  title: { fontFamily: fonts.semibold, fontSize: 15, color: colors.heading },
   sub: { marginTop: 2, fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
   empty: { padding: 14, fontFamily: fonts.body, fontSize: 13, color: colors.textMuted },
-  currentLocation: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8, paddingHorizontal: 4 },
-  currentLocationText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.primary },
+  currentLocation: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 4, alignSelf: "flex-start" },
+  currentLocationText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.blue },
   locationError: { fontFamily: fonts.body, fontSize: 12, color: "#B42318" },
 });

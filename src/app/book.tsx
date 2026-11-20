@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen } from "../components/Screen";
 import { GlassCard } from "../components/GlassCard";
 import { Button } from "../components/Button";
@@ -20,6 +22,7 @@ import { REQUIRE_LOGIN } from "../lib/authConfig";
 import { useT, type Key } from "../lib/i18n";
 import { getSavedPlaces, type SavedPlaces } from "../lib/prefs";
 import { whatsappSupport } from "../lib/contact";
+import { useLightStatusBar } from "../lib/statusBar";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 
@@ -28,6 +31,8 @@ const TITLES: Record<ServiceKind, string> = { local: "Local Taxi", outstation: "
 export default function Book() {
   const { t } = useT();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  useLightStatusBar();
   const params = useLocalSearchParams<{ type?: string; drop?: string; pickup?: string; car?: string; rebook?: string }>();
   const initial = KINDS.find((k) => k === params.type) ?? "local";
   const initialCarId = params.car ? CAR_TYPES.find((c) => c.id === params.car || c.name.toLowerCase().includes(String(params.car).toLowerCase()))?.id : undefined;
@@ -136,118 +141,142 @@ export default function Book() {
 
   const tripRows = rows(d).filter((r) => r.label !== "Name" && r.label !== "Mobile" && r.label !== "Car");
 
+  const car = CAR_TYPES.find((c) => c.id === d.carId);
+  const fareText = fare !== null ? formatCurrency(fare) : t("on_call");
+
   return (
-    <View style={{ flex: 1 }}>
-      <Screen bottomPad={130} scrollKey={step}>
-        <Pressable accessibilityRole="button" accessibilityLabel={t("back")} onPress={back} style={s.back}>
-          <Ionicons name="chevron-back" size={22} color={colors.white} />
-        </Pressable>
-        <Text style={s.h1}>{t(`title_${d.kind}` as Key)}</Text>
-        <Stepper step={step} labels={labels} />
-
-        {step === 1 && (
-          <View style={s.form}>
-            <Segmented options={KINDS.map((k) => ({ value: k, label: t(`kind_${k}` as Key) }))} value={d.kind} onChange={(kind) => set({ kind, pickup: kind === "outstation" ? "Visakhapatnam" : "", drop: "" })} />
-
-            {d.kind === "local" && (
-              <>
-                <LocationField label={t("lbl_pickup_address")} value={d.pickup} onChangeText={(pickup) => set({ pickup })} placeholder={t("ph_pickup_area")} popular={pickupList} limitToVizag />
-                <Label>{t("lbl_package")}</Label>
-                <Segmented options={LOCAL_PACKAGES.map((p) => ({ value: p.id, label: p.label.replace(" Hours", "hr").replace(" KM", "km") }))} value={d.localPkg} onChange={(localPkg) => set({ localPkg })} />
-              </>
-            )}
-            {d.kind === "outstation" && (
-              <>
-                <LocationField label={t("lbl_pickup")} value={d.pickup} onChangeText={(pickup) => set({ pickup })} placeholder={t("ph_pickup")} popular={pickupList} limitToVizag />
-                <LocationField label={t("lbl_drop")} value={d.drop} onChangeText={(drop) => set({ drop })} placeholder={t("ph_drop")} popular={popularDrop} />
-                <Segmented options={[{ value: "one", label: t("one_way") }, { value: "round", label: t("round_trip") }]} value={d.round ? "round" : "one"} onChange={(v) => set({ round: v === "round" })} />
-              </>
-            )}
-            {d.kind === "airport" && (
-              <>
-                <Segmented options={[{ value: "from", label: t("from_airport") }, { value: "to", label: t("to_airport") }]} value={d.fromAirport ? "from" : "to"} onChange={(v) => set({ fromAirport: v === "from", pickup: "" })} />
-                <LocationField label={d.fromAirport ? t("lbl_drop_loc") : t("lbl_pickup_loc")} value={d.pickup} onChangeText={(pickup) => set({ pickup })} placeholder={t("ph_airport_loc")} popular={pickupList} limitToVizag />
-              </>
-            )}
-            {d.kind === "tour" && (
-              <>
-                <Label>{t("choose_package")}</Label>
-                {TOUR_PACKAGES.map((x) => {
-                  const on = x.id === d.tourId;
-                  return (
-                    <Pressable key={x.id} accessibilityRole="button" accessibilityState={{ selected: on }} onPress={() => set({ tourId: x.id })}>
-                      <GlassCard r={16} strong={on} style={[{ padding: 14 }, on && { borderColor: colors.amber, borderWidth: 1.5 }]}>
-                        <Text style={s.tourName}>{x.name}</Text>
-                        <Text style={s.tourSub}>{x.days}D / {x.nights}N · {x.description}</Text>
-                      </GlassCard>
-                    </Pressable>
-                  );
-                })}
-                {tourPkg(d).highlights.length > 0 && <Text style={s.tourSub}>{t("covers")}: {tourPkg(d).highlights.slice(0, 5).join(", ")}…</Text>}
-              </>
-            )}
-
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <DateTimeField label={t("lbl_date")} mode="date" value={d.date} minimumDate={new Date()} onChange={(date) => set({ date })} />
-              {d.kind !== "tour" && <DateTimeField label={t("lbl_time")} mode="time" value={d.time} onChange={(time) => set({ time })} />}
-            </View>
+    <View style={{ flex: 1, backgroundColor: colors.paper }}>
+      <Screen padded={false} bottomPad={150} scrollKey={step}>
+        <LinearGradient colors={[colors.ink, colors.inkSoft]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.head, { paddingTop: insets.top + 10 }]}>
+          <View style={s.headRow}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("back")} onPress={back} style={s.back}>
+              <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
+            </Pressable>
+            <Text style={s.h1} accessibilityRole="header">{t(`title_${d.kind}` as Key)}</Text>
           </View>
-        )}
+          <Stepper step={step} labels={labels} onDark />
+        </LinearGradient>
 
-        {step === 2 && (
-          <View style={s.form}>
-            <Label>{t("choose_car")}</Label>
-            <View style={{ gap: 10 }}>
-              {CAR_TYPES.map((c) => (
-                <CarCard key={c.id} name={c.name} subtitle={c.subtitle} seats={c.seats} image={c.image} fare={carFare(c.id)} selected={c.id === d.carId} onPress={() => set({ carId: c.id })} />
-              ))}
-            </View>
-          </View>
-        )}
+        <View style={s.content}>
+          {step === 1 && (
+            <View style={s.form}>
+              <Segmented options={KINDS.map((k) => ({ value: k, label: t(`kind_${k}` as Key) }))} value={d.kind} onChange={(kind) => set({ kind, pickup: kind === "outstation" ? "Visakhapatnam" : "", drop: "" })} />
 
-        {step === 3 && (
-          <View style={s.form}>
-            <Label>{t("your_trip")}</Label>
-            <GlassCard style={{ paddingHorizontal: 16, paddingVertical: 6 }}>
-              <Rows rows={[...tripRows, { label: "Car", value: CAR_TYPES.find((c) => c.id === d.carId)?.name ?? "" }]} />
-            </GlassCard>
-            <GlassCard strong style={s.fare}>
-              <Text style={s.fareLabel}>{fare !== null ? t("fare_fixed") : t("fare_label")}</Text>
-              <Text style={s.fareValue}>{fare !== null ? formatCurrency(fare) : t("fare_on_call")}</Text>
-            </GlassCard>
-
-            {mustSignIn && (
-              <GlassCard style={{ padding: 14, gap: 10 }}>
-                <Text style={s.tourSub}>{t("login_to_book")}</Text>
-                <Button label={t("sign_in")} variant="glass" onPress={() => router.push("/login")} />
+              <GlassCard r={24} style={s.routeCard}>
+                {d.kind === "local" && (
+                  <>
+                    <LocationField marker="pickup" label={t("lbl_pickup_address")} value={d.pickup} onChangeText={(pickup) => set({ pickup })} placeholder={t("ph_pickup_area")} popular={pickupList} limitToVizag />
+                    <Label>{t("lbl_package")}</Label>
+                    <Segmented options={LOCAL_PACKAGES.map((p) => ({ value: p.id, label: p.label.replace(" Hours", "hr").replace(" KM", "km") }))} value={d.localPkg} onChange={(localPkg) => set({ localPkg })} />
+                  </>
+                )}
+                {d.kind === "outstation" && (
+                  <>
+                    <LocationField marker="pickup" label={t("lbl_pickup")} value={d.pickup} onChangeText={(pickup) => set({ pickup })} placeholder={t("ph_pickup")} popular={pickupList} limitToVizag />
+                    <LocationField marker="drop" label={t("lbl_drop")} value={d.drop} onChangeText={(drop) => set({ drop })} placeholder={t("ph_drop")} popular={popularDrop} />
+                    <Segmented options={[{ value: "one", label: t("one_way") }, { value: "round", label: t("round_trip") }]} value={d.round ? "round" : "one"} onChange={(v) => set({ round: v === "round" })} />
+                  </>
+                )}
+                {d.kind === "airport" && (
+                  <>
+                    <Segmented options={[{ value: "from", label: t("from_airport") }, { value: "to", label: t("to_airport") }]} value={d.fromAirport ? "from" : "to"} onChange={(v) => set({ fromAirport: v === "from", pickup: "" })} />
+                    <LocationField marker={d.fromAirport ? "drop" : "pickup"} label={d.fromAirport ? t("lbl_drop_loc") : t("lbl_pickup_loc")} value={d.pickup} onChangeText={(pickup) => set({ pickup })} placeholder={t("ph_airport_loc")} popular={pickupList} limitToVizag />
+                  </>
+                )}
+                {d.kind === "tour" && (
+                  <>
+                    <Label>{t("choose_package")}</Label>
+                    {TOUR_PACKAGES.map((x) => {
+                      const on = x.id === d.tourId;
+                      return (
+                        <Pressable key={x.id} accessibilityRole="button" accessibilityState={{ selected: on }} onPress={() => set({ tourId: x.id })} style={[s.tour, on && s.tourOn]}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={s.tourName}>{x.name}</Text>
+                            <Text style={s.tourSub}>{x.days}D / {x.nights}N · {x.description}</Text>
+                          </View>
+                          <View style={[s.radio, on && s.radioOn]}>{on ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}</View>
+                        </Pressable>
+                      );
+                    })}
+                    {tourPkg(d).highlights.length > 0 && <Text style={s.tourSub}>{t("covers")}: {tourPkg(d).highlights.slice(0, 5).join(", ")}…</Text>}
+                  </>
+                )}
               </GlassCard>
-            )}
 
-            <Label>{t("your_details")}</Label>
-            <Field label={t("lbl_name")} value={d.name} onChangeText={(name) => set({ name })} placeholder={t("ph_name")} />
-            <Field label={t("lbl_mobile")} value={d.mobile} onChangeText={(mobile) => set({ mobile })} placeholder={t("ph_mobile")} keyboardType="phone-pad" autoCapitalize="none" />
-            <Field label={t("lbl_email")} value={d.email} onChangeText={(email) => set({ email })} placeholder="name@example.com" keyboardType="email-address" autoCapitalize="none" />
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <DateTimeField label={t("lbl_date")} mode="date" value={d.date} minimumDate={new Date()} onChange={(date) => set({ date })} />
+                {d.kind !== "tour" && <DateTimeField label={t("lbl_time")} mode="time" value={d.time} onChange={(time) => set({ time })} />}
+              </View>
+            </View>
+          )}
 
-            {canPay && <Button label={t("send_enquiry")} variant="glass" onPress={onEnquiry} disabled={busy !== null} />}
-            <Button label={t("quick_whatsapp")} variant="outline" onPress={() => { const e = validateTrip(d) ?? validateContact(d); e ? setError(t(e)) : whatsappSupport(whatsappMessage(d)); }} />
-            <Text style={s.terms}>{TERMS_AND_CONDITIONS.map((x, i) => `${i + 1}. ${x}`).join("\n")}</Text>
-          </View>
-        )}
+          {step === 2 && (
+            <View style={s.form}>
+              <Text style={s.h2}>{t("choose_car")}</Text>
+              <View style={{ gap: 10 }}>
+                {CAR_TYPES.map((c) => (
+                  <CarCard key={c.id} name={c.name} subtitle={c.subtitle} seats={c.seats} image={c.image} fare={carFare(c.id)} selected={c.id === d.carId} onPress={() => set({ carId: c.id })} />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {step === 3 && (
+            <View style={s.form}>
+              <LinearGradient colors={[colors.ink, colors.inkSoft]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.fareBanner}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.fareLabel}>{fare !== null ? t("fare_fixed") : t("fare_label")}</Text>
+                  <Text style={s.fareValue}>{fare !== null ? formatCurrency(fare) : t("fare_on_call")}</Text>
+                </View>
+                {car ? <Image source={car.image} style={s.fareCar} resizeMode="contain" /> : null}
+              </LinearGradient>
+
+              <Text style={s.h2}>{t("your_trip")}</Text>
+              <GlassCard r={22} style={{ paddingHorizontal: 16, paddingVertical: 4 }}>
+                <Rows rows={[...tripRows, { label: "Car", value: car?.name ?? "" }]} />
+              </GlassCard>
+
+              {mustSignIn && (
+                <GlassCard strong r={20} style={{ padding: 14, gap: 10 }}>
+                  <Text style={s.tourSub}>{t("login_to_book")}</Text>
+                  <Button label={t("sign_in")} variant="primary" onPress={() => router.push("/login")} />
+                </GlassCard>
+              )}
+
+              <Text style={s.h2}>{t("your_details")}</Text>
+              <GlassCard r={22} style={{ padding: 16, gap: 14 }}>
+                <Field label={t("lbl_name")} value={d.name} onChangeText={(name) => set({ name })} placeholder={t("ph_name")} />
+                <Field label={t("lbl_mobile")} value={d.mobile} onChangeText={(mobile) => set({ mobile })} placeholder={t("ph_mobile")} keyboardType="phone-pad" autoCapitalize="none" />
+                <Field label={t("lbl_email")} value={d.email} onChangeText={(email) => set({ email })} placeholder="name@example.com" keyboardType="email-address" autoCapitalize="none" />
+              </GlassCard>
+
+              {canPay && <Button label={t("send_enquiry")} variant="glass" onPress={onEnquiry} disabled={busy !== null} />}
+              <Button label={t("quick_whatsapp")} variant="outline" icon="logo-whatsapp" onPress={() => { const e = validateTrip(d) ?? validateContact(d); e ? setError(t(e)) : whatsappSupport(whatsappMessage(d)); }} />
+              <Text style={s.terms}>{TERMS_AND_CONDITIONS.map((x, i) => `${i + 1}. ${x}`).join("\n")}</Text>
+            </View>
+          )}
+        </View>
       </Screen>
 
       <BottomBar>
         {error ? <Text accessibilityRole="alert" style={s.error}>{error}</Text> : null}
         {busy ? (
-          <ActivityIndicator color={colors.amber} style={{ flex: 1, minHeight: 52 }} />
+          <ActivityIndicator color={colors.blue} style={{ flex: 1, minHeight: 54 }} />
         ) : (
           <>
-            {step > 1 && <Button label={t("back")} variant="glass" onPress={back} style={{ flex: 1 }} />}
+            {step === 2 && (
+              <View style={{ flex: 1 }}>
+                <Text style={s.barLabel}>{t("fare_label")}</Text>
+                <Text style={s.barFare} numberOfLines={1}>{fareText}</Text>
+              </View>
+            )}
+            {step === 3 && <Button label={t("back")} variant="glass" onPress={back} style={{ flex: 1 }} />}
             {step < 3 ? (
-              <Button label={step === 1 ? t("next_car") : t("next_confirm")} onPress={next} style={{ flex: 2 }} />
+              <Button label={step === 1 ? t("next_car") : t("next_confirm")} variant="taxi" onPress={next} style={{ flex: step === 1 ? 1 : 1.6 }} />
             ) : canPay ? (
-              <Button label={`${t("pay_now")} ${formatCurrency(fare)}`} onPress={onPay} style={{ flex: 2 }} />
+              <Button label={`${t("pay_now")} ${formatCurrency(fare)}`} variant="taxi" onPress={onPay} style={{ flex: 2 }} />
             ) : (
-              <Button label={t("send_enquiry")} onPress={onEnquiry} style={{ flex: 2 }} />
+              <Button label={t("send_enquiry")} variant="taxi" onPress={onEnquiry} style={{ flex: 2 }} />
             )}
           </>
         )}
@@ -257,14 +286,26 @@ export default function Book() {
 }
 
 const s = StyleSheet.create({
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: colors.glassStrong, borderWidth: 1, borderColor: colors.glassBorder },
-  h1: { marginTop: 14, fontFamily: fonts.heading, fontSize: 30, color: colors.white },
-  form: { marginTop: 18, gap: 14 },
-  tourName: { fontFamily: fonts.heading, fontSize: 16, color: colors.white },
+  head: { paddingHorizontal: 20, paddingBottom: 20, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  headRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: colors.glassOnInk, borderWidth: 1, borderColor: colors.glassOnInkBorder },
+  h1: { flex: 1, fontFamily: fonts.heading, fontSize: 26, color: "#FFFFFF" },
+  content: { paddingHorizontal: 20 },
+  form: { marginTop: 20, gap: 14 },
+  routeCard: { padding: 16, gap: 14 },
+  h2: { fontFamily: fonts.heading, fontSize: 20, color: colors.heading, marginTop: 4 },
+  tour: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 18, backgroundColor: colors.paper, borderWidth: 1.5, borderColor: colors.line },
+  tourOn: { borderColor: colors.blue, backgroundColor: "#F3F7FF" },
+  tourName: { fontFamily: fonts.heading, fontSize: 16, color: colors.heading },
   tourSub: { marginTop: 2, fontFamily: fonts.body, fontSize: 12, lineHeight: 17, color: colors.textMuted },
-  fare: { padding: 16, gap: 4 },
-  fareLabel: { fontFamily: fonts.semibold, fontSize: 12, color: colors.textMuted },
-  fareValue: { fontFamily: fonts.heading, fontSize: 24, color: colors.amber },
-  error: { position: "absolute", top: -34, left: 0, right: 0, textAlign: "center", fontFamily: fonts.semibold, fontSize: 13, color: colors.danger, backgroundColor: "rgba(6,15,36,0.92)", paddingVertical: 6, paddingHorizontal: 10, borderRadius: 10, overflow: "hidden" },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: "#C5CEDF", alignItems: "center", justifyContent: "center" },
+  radioOn: { backgroundColor: colors.blue, borderColor: colors.blue },
+  fareBanner: { flexDirection: "row", alignItems: "center", padding: 18, borderRadius: 24, overflow: "hidden" },
+  fareLabel: { fontFamily: fonts.semibold, fontSize: 13, color: colors.onInkMuted },
+  fareValue: { marginTop: 2, fontFamily: fonts.heading, fontSize: 30, color: colors.taxi },
+  fareCar: { width: 112, height: 70 },
+  barLabel: { fontFamily: fonts.semibold, fontSize: 12, color: colors.textMuted },
+  barFare: { fontFamily: fonts.heading, fontSize: 22, color: colors.heading },
+  error: { position: "absolute", top: -48, left: 20, right: 20, textAlign: "center", fontFamily: fonts.semibold, fontSize: 13, color: "#B42318", backgroundColor: colors.dangerSoft, borderWidth: 1, borderColor: "#FECDCA", paddingVertical: 9, paddingHorizontal: 12, borderRadius: 14, overflow: "hidden" },
   terms: { fontFamily: fonts.body, fontSize: 12, lineHeight: 18, color: colors.textMuted },
 });

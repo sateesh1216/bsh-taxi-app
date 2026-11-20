@@ -78,7 +78,7 @@ export default function Login() {
 
   return (
     <Screen bottomPad={40}>
-      <Header eyebrow="BSH TAXI SERVICES" title={forgotOrReset ? t("reset_pw") : t("login_title")} />
+      <Header title={forgotOrReset ? t("reset_pw") : t("login_title")} />
       <Text style={s.sub}>{forgotOrReset ? (mode === "forgot" ? t("enter_email") : t("code_sent")) : t("login_sub")}</Text>
 
       <View style={{ gap: 14, marginTop: 20 }}>

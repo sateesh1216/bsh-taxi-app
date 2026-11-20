@@ -94,7 +94,6 @@ export default function Profile() {
     <Screen>
       <View style={s.header}>
         <View>
-          <Text style={s.eyebrow}>BSH TAXI SERVICES</Text>
           <Text style={s.title}>{t("profile_title")}</Text>
           <Text style={s.subtitle}>{t("profile_subtitle")}</Text>
         </View>
@@ -238,13 +237,13 @@ export default function Profile() {
 const s = StyleSheet.create({
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18 },
   eyebrow: { fontFamily: fonts.bold, fontSize: 10, letterSpacing: 2, color: colors.blue },
-  title: { marginTop: 5, fontFamily: fonts.heading, fontSize: 30, color: "#101828" },
+  title: { fontFamily: fonts.heading, fontSize: 32, color: "#101828" },
   subtitle: { marginTop: 4, fontFamily: fonts.body, fontSize: 13, color: colors.textMuted },
   headerIcon: { width: 48, height: 48, borderRadius: 16, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center" },
   accountCard: { padding: 18, gap: 13, backgroundColor: "#FFFFFF" },
   accountTop: { flexDirection: "row", alignItems: "center", gap: 13 },
-  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: "#EFF5FF", borderWidth: 1, borderColor: "#D6E4FF", alignItems: "center", justifyContent: "center" },
-  initial: { fontFamily: fonts.heading, fontSize: 23, color: colors.blue },
+  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.taxi, alignItems: "center", justifyContent: "center" },
+  initial: { fontFamily: fonts.heading, fontSize: 23, color: colors.ink },
   name: { fontFamily: fonts.heading, fontSize: 19, color: "#101828" },
   mail: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted },
   memberTag: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", gap: 4, marginTop: 3, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, backgroundColor: "#EFF5FF" },

@@ -1,20 +1,29 @@
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { colors, radius } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 
 type Props = {
   label: string;
   onPress?: () => void;
-  variant?: "primary" | "glass" | "outline" | "fleet";
+  variant?: "primary" | "glass" | "outline" | "fleet" | "taxi" | "dark";
   style?: ViewStyle;
   disabled?: boolean;
+  icon?: keyof typeof Ionicons.glyphMap;
 };
 
-/** 52px high so it is easy to tap. */
-export function Button({ label, onPress, variant = "primary", style, disabled }: Props) {
-  const primary = variant === "primary";
-  const fleet = variant === "fleet";
+const PALETTE = {
+  primary: { bg: colors.blue, fg: "#FFFFFF", border: colors.blue },
+  taxi: { bg: colors.taxi, fg: colors.ink, border: colors.taxi },
+  dark: { bg: colors.ink, fg: "#FFFFFF", border: colors.ink },
+  glass: { bg: "#EAEFF8", fg: colors.heading, border: "#EAEFF8" },
+  outline: { bg: "#FFFFFF", fg: colors.blue, border: "#B9CFFB" },
+  fleet: { bg: "#EAF1FF", fg: colors.blue, border: "#C7DAFF" },
+} as const;
+
+/** 54px high so it is easy to tap. `taxi` is the one main action per screen. */
+export function Button({ label, onPress, variant = "primary", style, disabled, icon }: Props) {
+  const p = PALETTE[variant];
   return (
     <Pressable
       accessibilityRole="button"
@@ -24,24 +33,20 @@ export function Button({ label, onPress, variant = "primary", style, disabled }:
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        variant === "glass" && styles.glass,
-        variant === "outline" && styles.outline,
-        fleet && styles.fleet,
-        { opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
+        { backgroundColor: p.bg, borderColor: p.border, opacity: disabled ? 0.5 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
         style,
       ]}
     >
-      {primary && <View style={[StyleSheet.absoluteFill, { backgroundColor: "#155EEF" }]} />}
-      {fleet && <LinearGradient colors={["#EFF5FF", "#DCEAFF"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />}
-      <Text style={[styles.text, { color: primary ? "#FFFFFF" : fleet ? "#155EEF" : variant === "outline" ? colors.amber : colors.white }]}>{label}</Text>
+      <View style={styles.inner}>
+        {icon ? <Ionicons name={icon} size={18} color={p.fg} /> : null}
+        <Text style={[styles.text, { color: p.fg }]} numberOfLines={1}>{label}</Text>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: { minHeight: 52, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", paddingHorizontal: 22, overflow: "hidden" },
-  glass: { backgroundColor: colors.glassStrong, borderWidth: 1, borderColor: colors.glassBorder },
-  outline: { borderWidth: 1.5, borderColor: colors.amber },
-  fleet: { borderWidth: 1, borderColor: "#C7DAFF" },
+  base: { minHeight: 54, borderRadius: radius.pill, borderWidth: 1.5, alignItems: "center", justifyContent: "center", paddingHorizontal: 22 },
+  inner: { flexDirection: "row", alignItems: "center", gap: 8 },
   text: { fontFamily: fonts.bold, fontSize: 15 },
 });

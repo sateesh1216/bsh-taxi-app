@@ -65,7 +65,7 @@ export default function PaymentResult() {
   }, [check]);
 
   const c = COPY[outcome];
-  const color = outcome === "success" ? colors.amber : outcome === "pending" ? colors.white : colors.danger;
+  const color = outcome === "success" ? colors.success : outcome === "pending" ? colors.white : colors.danger;
   const rows = [
     ...(number ? [{ label: "Enquiry no.", value: number }] : []),
     ...(ref ? [{ label: "Payment reference", value: ref }] : []),

@@ -2,11 +2,11 @@ import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image, Platform, Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { GlassCard } from "./GlassCard";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 
 export function Label({ children }: { children: string }) {
+  if (!children) return null;
   return <Text style={s.label}>{children}</Text>;
 }
 
@@ -14,48 +14,50 @@ type FieldProps = { label: string; value: string; onChangeText: (t: string) => v
 
 export function Field({ label, value, onChangeText, placeholder, keyboardType, autoCapitalize = "words", secure }: FieldProps) {
   const [hidden, setHidden] = useState(true);
+  const [focus, setFocus] = useState(false);
   return (
     <View style={{ gap: 6 }}>
       <Label>{label}</Label>
-      <GlassCard r={14}>
-        <View style={secure ? { flexDirection: "row", alignItems: "center" } : undefined}>
-          <TextInput
-            accessibilityLabel={label}
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            placeholderTextColor="#98A2B3"
-            keyboardType={keyboardType}
-            autoCapitalize={autoCapitalize}
-            secureTextEntry={secure && hidden}
-            autoCorrect={!secure}
-            style={[s.input, secure ? { flex: 1 } : null]}
-          />
-          {secure ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={hidden ? "Show password" : "Hide password"} onPress={() => setHidden((h) => !h)} hitSlop={8} style={{ paddingHorizontal: 14 }}>
-              <Ionicons name={hidden ? "eye-outline" : "eye-off-outline"} size={20} color="#667085" />
-            </Pressable>
-          ) : null}
-        </View>
-      </GlassCard>
+      <View style={[s.box, focus && s.boxFocus, { flexDirection: "row", alignItems: "center" }]}>
+        <TextInput
+          accessibilityLabel={label}
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={() => setFocus(true)}
+          onBlur={() => setFocus(false)}
+          placeholder={placeholder}
+          placeholderTextColor={colors.faint}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          secureTextEntry={secure && hidden}
+          autoCorrect={!secure}
+          style={[s.input, { flex: 1 }]}
+        />
+        {secure ? (
+          <Pressable accessibilityRole="button" accessibilityLabel={hidden ? "Show password" : "Hide password"} onPress={() => setHidden((h) => !h)} hitSlop={8} style={{ paddingHorizontal: 14 }}>
+            <Ionicons name={hidden ? "eye-outline" : "eye-off-outline"} size={20} color={colors.textMuted} />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
 
 type SegProps<T extends string> = { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void };
 
+/** Pill track with a white thumb on the selected option. */
 export function Segmented<T extends string>({ options, value, onChange }: SegProps<T>) {
   return (
-    <GlassCard r={16} style={{ flexDirection: "row", padding: 3 }}>
+    <View style={s.track}>
       {options.map((o) => {
         const on = o.value === value;
         return (
-          <Pressable key={o.value} accessibilityRole="button" accessibilityState={{ selected: on }} onPress={() => onChange(o.value)} style={[s.seg, on && { backgroundColor: colors.amber }]}>
-            <Text style={[s.segText, on && { color: colors.navy, fontFamily: fonts.bold }]}>{o.label}</Text>
+          <Pressable key={o.value} accessibilityRole="button" accessibilityState={{ selected: on }} onPress={() => onChange(o.value)} style={[s.seg, on && s.segOn]}>
+            <Text style={[s.segText, on && { color: colors.ink, fontFamily: fonts.bold }]} numberOfLines={1}>{o.label}</Text>
           </Pressable>
         );
       })}
-    </GlassCard>
+    </View>
   );
 }
 
@@ -70,13 +72,14 @@ export function DateTimeField({ label, mode, value, onChange, minimumDate }: DTP
     <View style={{ gap: 6, flex: 1 }}>
       <Label>{label}</Label>
       {Platform.OS === "ios" ? (
-        <GlassCard r={14} style={{ minHeight: 52, justifyContent: "center", alignItems: "flex-start", paddingHorizontal: 8 }}>
+        <View style={[s.box, { minHeight: 54, justifyContent: "center", alignItems: "flex-start", paddingHorizontal: 8 }]}>
           <DateTimePicker value={value} mode={mode} display="compact" themeVariant="light" minimumDate={minimumDate} onChange={(_, d) => d && onChange(d)} />
-        </GlassCard>
+        </View>
       ) : (
         <>
-          <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={() => setShow(true)}>
-            <GlassCard r={14}><Text style={s.input}>{text}</Text></GlassCard>
+          <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={() => setShow(true)} style={[s.box, { flexDirection: "row", alignItems: "center", paddingLeft: 14 }]}>
+            <Ionicons name={mode === "date" ? "calendar-outline" : "time-outline"} size={18} color={colors.blue} />
+            <Text style={[s.input, { flex: 1 }]}>{text}</Text>
           </Pressable>
           {show && <DateTimePicker value={value} mode={mode} minimumDate={minimumDate} onChange={(e, d) => { setShow(false); if (e.type === "set" && d) onChange(d); }} />}
         </>
@@ -87,31 +90,41 @@ export function DateTimeField({ label, mode, value, onChange, minimumDate }: DTP
 
 type CarProps = { name: string; subtitle: string; seats: number; image: number; fare: string; selected: boolean; onPress: () => void };
 
+/** Ride option row: photo, name + seats, fare on the right. */
 export function CarCard({ name, subtitle, seats, image, fare, selected, onPress }: CarProps) {
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected }} accessibilityLabel={`${name}, ${seats} seats, ${fare}`} onPress={onPress}>
-      <GlassCard r={18} strong={selected} style={selected ? { borderColor: colors.amber, borderWidth: 1.5 } : undefined}>
-        <View style={s.car}>
-          <Image source={image} style={s.carImg} resizeMode="contain" />
-          <View style={{ flex: 1 }}>
-            <Text style={s.carName}>{name}</Text>
-            <Text style={s.carSub}>{subtitle} · {seats} seats</Text>
-          </View>
-          <Text style={s.carFare}>{fare}</Text>
-        </View>
-      </GlassCard>
+    <Pressable accessibilityRole="button" accessibilityState={{ selected }} accessibilityLabel={`${name}, ${seats} seats, ${fare}`} onPress={onPress} style={({ pressed }) => [s.car, selected && s.carOn, { transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
+      <Image source={image} style={s.carImg} resizeMode="contain" />
+      <View style={{ flex: 1, gap: 3 }}>
+        <Text style={s.carName} numberOfLines={2}>{name}</Text>
+        <Text style={s.carSub} numberOfLines={1}>{subtitle}</Text>
+        <View style={s.seatRow}><Ionicons name="people-outline" size={13} color={colors.textMuted} /><Text style={s.seatText}>{seats} seats</Text></View>
+      </View>
+      <View style={{ alignItems: "flex-end", gap: 6 }}>
+        <Text style={[s.carFare, fare.toLowerCase().includes("call") && { fontSize: 12, color: colors.textMuted, fontFamily: fonts.semibold }]}>{fare}</Text>
+        <View style={[s.radio, selected && s.radioOn]}>{selected ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}</View>
+      </View>
     </Pressable>
   );
 }
 
 const s = StyleSheet.create({
-  label: { fontFamily: fonts.semibold, fontSize: 12, color: colors.textMuted },
-  input: { minHeight: 52, paddingHorizontal: 14, fontFamily: fonts.body, fontSize: 15, color: colors.white, textAlignVertical: "center", paddingVertical: 14 },
-  seg: { flex: 1, minHeight: 44, borderRadius: 13, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
-  segText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.white },
-  car: { flexDirection: "row", alignItems: "center", gap: 10, padding: 10 },
-  carImg: { width: 84, height: 58 },
-  carName: { fontFamily: fonts.heading, fontSize: 15, color: colors.white },
-  carSub: { fontFamily: fonts.body, fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  carFare: { fontFamily: fonts.bold, fontSize: 14, color: colors.amber, maxWidth: 74, textAlign: "right" },
+  label: { fontFamily: fonts.semibold, fontSize: 13, color: colors.body },
+  box: { backgroundColor: colors.card, borderRadius: 16, borderWidth: 1.5, borderColor: colors.line, overflow: "hidden" },
+  boxFocus: { borderColor: colors.blue },
+  input: { minHeight: 52, paddingHorizontal: 14, fontFamily: fonts.body, fontSize: 15, color: colors.heading, textAlignVertical: "center", paddingVertical: 14 },
+  track: { flexDirection: "row", padding: 4, borderRadius: 18, backgroundColor: "#E7ECF6", gap: 2 },
+  seg: { flex: 1, minHeight: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
+  segOn: { backgroundColor: "#FFFFFF", shadowColor: colors.ink, shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
+  segText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.body },
+  car: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20, backgroundColor: colors.card, borderWidth: 1.5, borderColor: colors.line },
+  carOn: { borderColor: colors.blue, backgroundColor: "#F3F7FF" },
+  carImg: { width: 88, height: 60 },
+  carName: { fontFamily: fonts.heading, fontSize: 16, lineHeight: 20, color: colors.heading },
+  carSub: { fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
+  seatRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  seatText: { fontFamily: fonts.semibold, fontSize: 12, color: colors.textMuted },
+  carFare: { fontFamily: fonts.heading, fontSize: 18, color: colors.heading, maxWidth: 84, textAlign: "right" },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: "#C5CEDF", alignItems: "center", justifyContent: "center" },
+  radioOn: { backgroundColor: colors.blue, borderColor: colors.blue },
 });
