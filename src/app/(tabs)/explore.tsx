@@ -1,12 +1,10 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Screen } from "../../components/Screen";
 import { GlassCard } from "../../components/GlassCard";
 import { ImageCard } from "../../components/Content";
 import { Button } from "../../components/Button";
-import { img } from "../../data/images";
 import { destinations, fleetVehicles, outstations, popularPickup, reviews, services } from "../../data/site";
 import { useT, type Key } from "../../lib/i18n";
 import { colors } from "../../theme/colors";
@@ -43,29 +41,30 @@ export default function Explore() {
   const { t } = useT();
   return (
     <Screen>
+      <Text style={s.eyebrow}>{t("explore_eyebrow")}</Text>
       <Text style={s.title}>{t("tab_explore")}</Text>
       <Text style={s.intro}>{t("explore_intro")}</Text>
 
-      <LinearGradient colors={[colors.ink, colors.inkSoft]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.heroCard}>
+      <GlassCard strong r={20} style={s.heroCard}>
         <View style={s.heroTop}>
-          <View style={s.heroIcon}><Ionicons name="car-sport" size={22} color={colors.ink} /></View>
+          <View style={s.heroIcon}><Ionicons name="car-sport" size={22} color="#155EEF" /></View>
           <View style={{ flex: 1 }}>
             <Text style={s.heroTitle}>{t("where_go")}</Text>
             <Text style={s.heroSub}>{t("start_booking_hint")}</Text>
           </View>
         </View>
-        <Button label={t("book_ride")} variant="taxi" onPress={() => router.push("/book?type=local")} />
-      </LinearGradient>
+        <Button label={t("book_ride")} onPress={() => router.push("/book?type=local")} />
+      </GlassCard>
 
       <SectionHeading title={t("quick_booking")} />
       <View style={s.quickGrid}>
         {QUICK_BOOK.map((item) => (
           <Pressable key={item.type} accessibilityRole="button" accessibilityLabel={`Book ${t(item.titleKey)}`} onPress={() => router.push(`/book?type=${item.type}`)} style={s.quickWrap}>
-            <GlassCard r={20} style={s.quickCard}>
-              <View style={s.quickIcon}><Ionicons name={item.icon} size={21} color={colors.blue} /></View>
+            <GlassCard r={17} style={s.quickCard}>
+              <View style={s.quickIcon}><Ionicons name={item.icon} size={21} color="#155EEF" /></View>
               <Text style={s.quickTitle}>{t(item.titleKey)}</Text>
               <Text style={s.quickSub}>{t(item.subtitleKey)}</Text>
-              <View style={s.quickFooter}><Text style={s.quickAction}>{t("book_now")}</Text><Ionicons name="arrow-forward" size={15} color={colors.blue} /></View>
+              <View style={s.quickFooter}><Text style={s.quickAction}>{t("book_now")}</Text><Ionicons name="arrow-forward" size={15} color="#155EEF" /></View>
             </GlassCard>
           </Pressable>
         ))}
@@ -76,7 +75,7 @@ export default function Explore() {
       <View style={s.locationGrid}>
         {popularPickup.slice(0, 8).map((place) => (
           <Pressable key={place.primary} accessibilityRole="button" onPress={() => router.push(`/book?type=local&drop=${encodeURIComponent(place.fullLabel)}`)} style={s.locationItem}>
-            <View style={s.locationIcon}><Ionicons name="location-outline" size={17} color={colors.blue} /></View>
+            <View style={s.locationIcon}><Ionicons name="location-outline" size={17} color="#155EEF" /></View>
             <View style={{ flex: 1 }}><Text style={s.locationName}>{place.primary}</Text><Text style={s.locationSub} numberOfLines={1}>{place.secondary}</Text></View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </Pressable>
@@ -89,11 +88,11 @@ export default function Explore() {
           const drop = route.name.replace(/^Vizag to /i, "");
           return (
             <Pressable key={route.slug} accessibilityRole="button" accessibilityLabel={`Book ${route.name}`} onPress={() => router.push(`/book?type=outstation&drop=${encodeURIComponent(drop)}`)} style={{ width: 220 }}>
-              <GlassCard r={20} style={s.routeCard}>
-                <View style={s.routeIcon}><Ionicons name="navigate" size={19} color={colors.blue} /></View>
+              <GlassCard r={17} style={s.routeCard}>
+                <View style={s.routeIcon}><Ionicons name="navigate" size={19} color="#155EEF" /></View>
                 <Text style={s.routeName}>{route.name}</Text>
                 <Text style={s.routeSub}>{route.distanceKm ? `${route.distanceKm} km` : "Outstation route"}{route.costPerDay ? ` · From ₹${route.costPerDay.toLocaleString("en-IN")}/day` : ""}</Text>
-                <View style={s.cardAction}><Text style={s.cardActionText}>Book this route</Text><Ionicons name="arrow-forward" size={14} color={colors.blue} /></View>
+                <View style={s.cardAction}><Text style={s.cardActionText}>Book this route</Text><Ionicons name="arrow-forward" size={14} color="#155EEF" /></View>
               </GlassCard>
             </Pressable>
           );
@@ -105,7 +104,7 @@ export default function Explore() {
         {destinations.slice(0, 6).map((destination) => (
           <View key={destination.slug} style={{ width: 238 }}>
             <ImageCard title={destination.name} subtitle={[destination.category, destination.distanceKm ? `${destination.distanceKm} km from Vizag` : null].filter(Boolean).join(" · ")} image={destination.image} height={155} onPress={() => router.push(`/destinations/${destination.slug}`)} />
-            <Pressable accessibilityRole="button" onPress={() => router.push(`/book?type=outstation&drop=${encodeURIComponent(destination.name)}`)} style={s.underCardAction}><Text style={s.underCardText}>Book a cab to {destination.name}</Text><Ionicons name="arrow-forward" size={14} color={colors.blue} /></Pressable>
+            <Pressable accessibilityRole="button" onPress={() => router.push(`/book?type=outstation&drop=${encodeURIComponent(destination.name)}`)} style={s.underCardAction}><Text style={s.underCardText}>Book a cab to {destination.name}</Text><Ionicons name="arrow-forward" size={14} color="#155EEF" /></Pressable>
           </View>
         ))}
       </ScrollView>
@@ -114,12 +113,11 @@ export default function Explore() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.horizontal}>
         {fleetVehicles.slice(0, 6).map((vehicle) => (
           <Pressable key={vehicle.slug} accessibilityRole="button" onPress={() => router.push("/fleet")} style={{ width: 205 }}>
-            <GlassCard r={20} style={s.vehicleCard}>
-              {img(vehicle.image) ? <Image source={img(vehicle.image)!} style={s.vehicleImg} resizeMode="contain" accessibilityLabel={vehicle.name} /> : null}
+            <GlassCard r={17} style={s.vehicleCard}>
               <Text style={s.vehicleName}>{vehicle.name}</Text>
               <Text style={s.vehicleMeta}>{vehicle.seats} seats · {vehicle.bags} bags · {vehicle.hasAC ? "AC" : "Non-AC"}</Text>
               <Text style={s.vehicleUse}>{vehicle.description}</Text>
-              <Text style={s.vehicleAction}>View details</Text>
+              <Text style={s.vehicleAction}>View details <Ionicons name="arrow-forward" size={13} color="#155EEF" /></Text>
             </GlassCard>
           </Pressable>
         ))}
@@ -138,8 +136,8 @@ export default function Explore() {
       <View style={s.list}>
         {HUB.map((item) => (
           <Pressable key={item.title} accessibilityRole="button" onPress={() => router.push(item.href as never)}>
-            <GlassCard r={18} style={s.hubRow}>
-              <View style={s.hubIcon}><Ionicons name={item.icon} size={20} color={colors.blue} /></View>
+            <GlassCard r={16} style={s.hubRow}>
+              <View style={s.hubIcon}><Ionicons name={item.icon} size={20} color="#155EEF" /></View>
               <View style={{ flex: 1 }}><Text style={s.hubTitle}>{item.title}</Text><Text style={s.hubSub}>{item.sub}</Text></View>
               {item.count > 0 ? <Text style={s.count}>{item.count}</Text> : null}
               <Ionicons name="chevron-forward" size={17} color={colors.textMuted} />
@@ -152,49 +150,49 @@ export default function Explore() {
 }
 
 const s = StyleSheet.create({
-  title: { fontFamily: fonts.heading, fontSize: 32, color: colors.heading },
-  intro: { marginTop: 5, marginBottom: 18, fontFamily: fonts.body, fontSize: 14, lineHeight: 21, color: colors.body },
-  heroCard: { padding: 16, gap: 16, borderRadius: 26, overflow: "hidden" },
+  eyebrow: { fontFamily: fonts.bold, fontSize: 10, letterSpacing: 1.6, color: colors.amber },
+  title: { marginTop: 5, fontFamily: fonts.heading, fontSize: 32, color: colors.white },
+  intro: { marginTop: 5, marginBottom: 18, fontFamily: fonts.body, fontSize: 13, lineHeight: 20, color: colors.textMuted },
+  heroCard: { padding: 15, gap: 13 },
   heroTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  heroIcon: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.taxi, alignItems: "center", justifyContent: "center" },
-  heroTitle: { fontFamily: fonts.heading, fontSize: 19, color: "#FFFFFF" },
-  heroSub: { marginTop: 3, fontFamily: fonts.body, fontSize: 12.5, color: colors.onInkMuted },
-  sectionHead: { marginTop: 28, marginBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
-  sectionTitle: { fontFamily: fonts.heading, fontSize: 22, color: colors.heading, flex: 1 },
-  more: { fontFamily: fonts.bold, fontSize: 13, color: colors.blue },
+  heroIcon: { width: 46, height: 46, borderRadius: 14, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center" },
+  heroTitle: { fontFamily: fonts.heading, fontSize: 18, color: colors.white },
+  heroSub: { marginTop: 3, fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
+  sectionHead: { marginTop: 23, marginBottom: 11, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  sectionTitle: { fontFamily: fonts.heading, fontSize: 20, color: colors.white, flex: 1 },
+  more: { fontFamily: fonts.semibold, fontSize: 12, color: colors.amber },
   quickGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   quickWrap: { width: "48%", flexGrow: 1 },
-  quickCard: { minHeight: 152, padding: 14, gap: 5 },
-  quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#EAF1FF", alignItems: "center", justifyContent: "center", marginBottom: 4 },
-  quickTitle: { fontFamily: fonts.heading, fontSize: 16, color: colors.heading },
-  quickSub: { minHeight: 30, fontFamily: fonts.body, fontSize: 11.5, lineHeight: 16, color: colors.textMuted },
-  quickFooter: { marginTop: "auto", paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.divider, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  quickAction: { fontFamily: fonts.bold, fontSize: 12.5, color: colors.blue },
-  helper: { marginTop: -6, marginBottom: 10, fontFamily: fonts.body, fontSize: 12, lineHeight: 17, color: colors.textMuted },
-  locationGrid: { borderRadius: 22, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.card, paddingHorizontal: 14 },
-  locationItem: { minHeight: 62, flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
-  locationIcon: { width: 34, height: 34, borderRadius: 17, backgroundColor: "#EAF1FF", alignItems: "center", justifyContent: "center" },
-  locationName: { fontFamily: fonts.semibold, fontSize: 14, color: colors.heading },
-  locationSub: { marginTop: 2, fontFamily: fonts.body, fontSize: 11, color: colors.textMuted },
-  horizontal: { gap: 12, paddingRight: 2, paddingBottom: 2 },
-  routeCard: { minHeight: 156, padding: 14, gap: 5 },
-  routeIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#EAF1FF", alignItems: "center", justifyContent: "center", marginBottom: 2 },
-  routeName: { fontFamily: fonts.heading, fontSize: 16, color: colors.heading },
-  routeSub: { fontFamily: fonts.body, fontSize: 11.5, color: colors.textMuted },
-  cardAction: { marginTop: "auto", paddingTop: 9, borderTopWidth: 1, borderTopColor: colors.divider, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  cardActionText: { fontFamily: fonts.bold, fontSize: 12, color: colors.blue },
-  underCardAction: { marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 4 },
-  underCardText: { fontFamily: fonts.bold, fontSize: 12, color: colors.blue },
-  vehicleCard: { minHeight: 170, padding: 14, gap: 4 },
-  vehicleImg: { width: "100%", height: 70, marginBottom: 4 },
-  vehicleName: { fontFamily: fonts.heading, fontSize: 16, color: colors.heading },
-  vehicleMeta: { fontFamily: fonts.body, fontSize: 11.5, color: colors.textMuted },
-  vehicleUse: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 16, color: colors.textMuted },
-  vehicleAction: { marginTop: "auto", fontFamily: fonts.bold, fontSize: 12, color: colors.blue },
-  list: { gap: 10, marginBottom: 15 },
-  hubRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12 },
-  hubIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: "#EAF1FF", alignItems: "center", justifyContent: "center" },
-  hubTitle: { fontFamily: fonts.heading, fontSize: 15, color: colors.heading },
-  hubSub: { marginTop: 2, fontFamily: fonts.body, fontSize: 11.5, color: colors.textMuted },
-  count: { fontFamily: fonts.bold, fontSize: 12, color: colors.blue, backgroundColor: "#EAF1FF", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, overflow: "hidden", marginRight: 1 },
+  quickCard: { minHeight: 150, padding: 12, gap: 5 },
+  quickIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center", marginBottom: 3 },
+  quickTitle: { fontFamily: fonts.heading, fontSize: 15, color: colors.white },
+  quickSub: { minHeight: 30, fontFamily: fonts.body, fontSize: 11, lineHeight: 15, color: colors.textMuted },
+  quickFooter: { marginTop: "auto", paddingTop: 7, borderTopWidth: 1, borderTopColor: colors.divider, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  quickAction: { fontFamily: fonts.semibold, fontSize: 12, color: colors.amber },
+  helper: { marginTop: -5, marginBottom: 8, fontFamily: fonts.body, fontSize: 11, lineHeight: 16, color: colors.textMuted },
+  locationGrid: { borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder, backgroundColor: "#FFFFFF", paddingHorizontal: 12 },
+  locationItem: { minHeight: 59, flexDirection: "row", alignItems: "center", gap: 10, borderBottomWidth: 1, borderBottomColor: colors.divider },
+  locationIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center" },
+  locationName: { fontFamily: fonts.semibold, fontSize: 13, color: colors.white },
+  locationSub: { marginTop: 2, fontFamily: fonts.body, fontSize: 10, color: colors.textMuted },
+  horizontal: { gap: 11, paddingRight: 2, paddingBottom: 2 },
+  routeCard: { minHeight: 151, padding: 13, gap: 5 },
+  routeIcon: { width: 36, height: 36, borderRadius: 11, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center", marginBottom: 2 },
+  routeName: { fontFamily: fonts.heading, fontSize: 15, color: colors.white },
+  routeSub: { fontFamily: fonts.body, fontSize: 11, color: colors.textMuted },
+  cardAction: { marginTop: "auto", paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.divider, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  cardActionText: { fontFamily: fonts.semibold, fontSize: 11, color: colors.amber },
+  underCardAction: { marginTop: 7, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 2 },
+  underCardText: { fontFamily: fonts.semibold, fontSize: 11, color: colors.amber },
+  vehicleCard: { minHeight: 122, padding: 13, gap: 5 },
+  vehicleName: { fontFamily: fonts.heading, fontSize: 16, color: colors.white },
+  vehicleMeta: { fontFamily: fonts.body, fontSize: 11, color: colors.textMuted },
+  vehicleUse: { fontFamily: fonts.body, fontSize: 11, lineHeight: 15, color: colors.textMuted },
+  vehicleAction: { marginTop: "auto", fontFamily: fonts.semibold, fontSize: 11, color: colors.amber },
+  list: { gap: 9, marginBottom: 15 },
+  hubRow: { flexDirection: "row", alignItems: "center", gap: 11, padding: 11 },
+  hubIcon: { width: 39, height: 39, borderRadius: 12, backgroundColor: "#EFF5FF", alignItems: "center", justifyContent: "center" },
+  hubTitle: { fontFamily: fonts.heading, fontSize: 14, color: colors.white },
+  hubSub: { marginTop: 2, fontFamily: fonts.body, fontSize: 10, color: colors.textMuted },
+  count: { fontFamily: fonts.bold, fontSize: 11, color: colors.amber, marginRight: 1 },
 });

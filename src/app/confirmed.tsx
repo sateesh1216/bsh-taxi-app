@@ -32,7 +32,7 @@ export default function Confirmed() {
         <Text style={s.h1}>{t("enq_sent")}</Text>
         {shown && <Text style={s.sub}>{t("enq_no")} <Text style={{ color: colors.white, fontFamily: fonts.bold }}>{shown}</Text></Text>}
         <Text style={[s.sub, { marginTop: 8 }]}>{t("enq_contact")}</Text>
-        <Text style={[s.sub, { marginTop: 6, color: colors.success }]}>{user ? t("saved_account") : t("saved_phone")}</Text>
+        <Text style={[s.sub, { marginTop: 6, color: colors.amber }]}>{user ? t("saved_account") : t("saved_phone")}</Text>
       </View>
 
       {e && (
@@ -42,7 +42,7 @@ export default function Confirmed() {
       )}
 
       <View style={{ gap: 10, marginTop: 20 }}>
-        <Button label={t("continue_wa")} variant="taxi" icon="logo-whatsapp" onPress={() => whatsappSupport(e?.whatsapp)} />
+        <Button label={t("continue_wa")} onPress={() => whatsappSupport(e?.whatsapp)} />
         <Button label={t("call_us")} variant="glass" onPress={callSupport} />
         <Button label={t("back_home")} variant="outline" onPress={() => router.replace("/")} />
       </View>
@@ -52,7 +52,7 @@ export default function Confirmed() {
 
 const s = StyleSheet.create({
   center: { alignItems: "center", marginTop: 40 },
-  tick: { width: 92, height: 92, borderRadius: 46, alignItems: "center", justifyContent: "center", backgroundColor: colors.success, borderWidth: 8, borderColor: "#D1FADF" },
+  tick: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center", backgroundColor: "#155EEF" },
   h1: { marginTop: 18, fontFamily: fonts.heading, fontSize: 30, color: colors.white },
   sub: { marginTop: 4, fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.textMuted, textAlign: "center" },
 });

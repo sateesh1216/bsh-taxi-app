@@ -18,8 +18,8 @@ export default function Fleet() {
       <Header eyebrow="OUR FLEET" title="Clean, serviced cars" />
       <View style={s.chips}>
         {["All", ...fleetCategories].map((c) => (
-          <Pressable key={c} accessibilityRole="button" accessibilityState={{ selected: c === cat }} onPress={() => setCat(c)} style={[s.chip, c === cat && { backgroundColor: colors.ink, borderColor: colors.ink }]}>
-            <Text style={[s.chipText, c === cat && { color: "#FFFFFF" }]}>{c}</Text>
+          <Pressable key={c} accessibilityRole="button" accessibilityState={{ selected: c === cat }} onPress={() => setCat(c)} style={[s.chip, c === cat && { backgroundColor: colors.amber, borderColor: colors.amber }]}>
+            <Text style={[s.chipText, c === cat && { color: colors.navy }]}>{c}</Text>
           </Pressable>
         ))}
       </View>
@@ -37,7 +37,7 @@ export default function Fleet() {
                 </View>
                 <Text style={s.sub}>{v.category} · {v.seats} seats · {v.bags} bags{v.hasAC ? " · AC" : ""}</Text>
                 <Text style={s.desc}>{v.description}</Text>
-                <Button label="Book Now" variant="taxi" onPress={() => router.push("/book?type=local")} style={{ marginTop: 8 }} />
+                <Button label="Book Now" variant="fleet" onPress={() => router.push("/book?type=local")} style={{ marginTop: 8 }} />
               </View>
             </GlassCard>
           );
@@ -49,12 +49,12 @@ export default function Fleet() {
 
 const s = StyleSheet.create({
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: { minHeight: 42, paddingHorizontal: 16, borderRadius: 21, justifyContent: "center", backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line },
+  chip: { minHeight: 44, paddingHorizontal: 16, borderRadius: 22, justifyContent: "center", backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.glassBorder },
   chipText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.white },
   img: { width: "100%", height: 170, marginTop: 8 },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   name: { fontFamily: fonts.heading, fontSize: 20, color: colors.white },
-  price: { fontFamily: fonts.heading, fontSize: 18, color: colors.heading },
+  price: { fontFamily: fonts.heading, fontSize: 18, color: colors.amber },
   sub: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted },
-  desc: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.body },
+  desc: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.white },
 });
